@@ -15,8 +15,8 @@ export default function Checkout() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const rzorpayKey = useSelector((state) => state?.razorpay?.key);
-  const [subscription_id, setSubscription_id] = useState(
-    useSelector((state) => state?.razorpay?.subscription_id)
+  const [order_id, setOrder_id] = useState(
+    useSelector((state) => state?.razorpay?.order_id)
   );
   const isPaymentVerified = useSelector(
     (state) => state?.razorpay?.isPaymentVerified
@@ -24,20 +24,42 @@ export default function Checkout() {
   const userData = useSelector((state) => state?.auth?.data);
   const paymentDetails = {
     razorpay_payment_id: "",
-    razorpay_subscription_id: "",
+    razorpay_order_id: "",
     razorpay_signature: "",
   };
 
+  async function loadScript(src) {
+    return new Promise((resolve) => {
+      const script = document.createElement("script");
+      script.src = src;
+      script.onload = () => {
+        resolve(true);
+      };
+      script.onerror = () => {
+        resolve(false);
+      };
+      document.body.appendChild(script);
+    });
+  }
+
   async function handleSubscription(e) {
     e.preventDefault();
-    if (!rzorpayKey || !subscription_id) {
+
+    const res = await loadScript("https://checkout.razorpay.com/v1/checkout.js");
+
+    if (!res) {
+      toast.error("Razorpay SDK failed to load.");
+      return;
+    }
+
+    if (!rzorpayKey || !order_id) {
       toast.error("something went wrong");
       return;
     }
 
     const options = {
       key: rzorpayKey,
-      subscription_id: subscription_id,
+      order_id: order_id,
       name: "Coursify Pvt Ltd",
       description: "subscription",
       theme: {
@@ -50,8 +72,8 @@ export default function Checkout() {
       handler: async function (response) {
         paymentDetails.razorpay_payment_id = response.razorpay_payment_id;
         paymentDetails.razorpay_signature = response.razorpay_signature;
-        paymentDetails.razorpay_subscription_id =
-          response.razorpay_subscription_id;
+        paymentDetails.razorpay_order_id =
+          response.razorpay_order_id;
 
         toast.success("Payment successful");
 
@@ -63,8 +85,15 @@ export default function Checkout() {
         }
       },
     };
-    const paymentObject = new window.Razorpay(options);
-    paymentObject.open();
+    console.log("Razorpay Key:", rzorpayKey);
+    console.log("Order ID:", order_id);
+    try {
+      const paymentObject = new window.Razorpay(options);
+      paymentObject.open();
+    } catch (error) {
+      console.error("Error initializing Razorpay: ", error);
+      toast.error("Failed to open Razorpay checkout.");
+    }
   }
 
   useEffect(() => {
@@ -82,13 +111,16 @@ export default function Checkout() {
 
       // if already created subscription, then use previous id for this
       case "created":
-        setSubscription_id(userData?.subscription?.id);
+        setOrder_id(userData?.subscription?.id);
         break;
 
       default:
         // If the user doesn't have a subscription, purchase a bundle
         (async () => {
-          await dispatch(purchaseCourseBundle());
+          const response = await dispatch(purchaseCourseBundle());
+          if (response?.payload?.order_id) {
+            setOrder_id(response.payload.order_id);
+          }
         })();
         break;
     }

@@ -30,23 +30,24 @@ export const buySubscription = async (req, res, next) => {
             return next(new AppError("Admin cannot purchase a subscription", 400));
         }
 
-        const subscription = await razorpay.subscriptions.create({
-            plan_id: process.env.RAZORPAY_PLAN_ID,
-            customer_notify: 1,
-            total_count: 1
+        const order = await razorpay.orders.create({
+            amount: 49900, // amount in smallest currency unit (e.g., 100 paise = 1 INR)
+            currency: "INR",
+            receipt: `receipt_${user._id}`,
         });
 
-        user.subscription.id = subscription.id;
-        user.subscription.status = subscription.status;
+        user.subscription.id = order.id;
+        user.subscription.status = order.status;
 
         await user.save();
 
         res.status(200).json({
             success: true,
-            message: "Subscribed Successfully",
-            subscription_id: subscription.id,
+            message: "Order Created Successfully",
+            order_id: order.id,
         });
     } catch (e) {
+        console.error(e); // Log the error for debugging
         return next(new AppError(e.message, 500));
     }
 };
@@ -55,18 +56,18 @@ export const buySubscription = async (req, res, next) => {
 export const verifySubscription = async (req, res, next) => {
     try {
         const { id } = req.user;
-        const { razorpay_payment_id, razorpay_signature, razorpay_subscription_id } = req.body;
+        const { razorpay_payment_id, razorpay_signature, razorpay_order_id } = req.body;
 
         const user = await userModel.findById(id);
         if (!user) {
             return next(new AppError('Unauthorised, please login', 500))
         }
 
-        const subscriptionId = user.subscription.id;
+        const orderId = user.subscription.id;
 
         const generatedSignature = crypto
             .createHmac("sha256", process.env.RAZORPAY_SECRET)
-            .update(`${razorpay_payment_id}|${subscriptionId}`)
+            .update(`${razorpay_order_id}|${razorpay_payment_id}`)
             .digest('hex');
 
         if (generatedSignature !== razorpay_signature) {
@@ -76,7 +77,7 @@ export const verifySubscription = async (req, res, next) => {
         await paymentModel.create({
             razorpay_payment_id,
             razorpay_signature,
-            razorpay_subscription_id
+            razorpay_order_id
         })
 
         user.subscription.status = 'active';
@@ -92,43 +93,24 @@ export const verifySubscription = async (req, res, next) => {
 }
 
 export const cancelSubscription = async (req, res, next) => {
-    const { id } = req.user;
-
-    const user = await userModel.findById(id);
-
-    if (user.role === 'ADMIN') {
-        return next(
-            new AppError('Admin does not need to cannot cancel subscription', 400)
-        );
-    }
-
-    const subscriptionId = user.subscription.id;
-
-    try {
-        const subscription = await razorpay.subscriptions.cancel(
-            subscriptionId
-        );
-
-        user.subscription.status = subscription.status;
-
-        await user.save();
-    } catch (error) {
-        return next(new AppError(error.error.description, error.statusCode));
-    }
-}
+    // This function is for cancelling subscriptions, which is not currently in use
+    // as we are using an order-based payment system. Re-evaluate if subscriptions
+    // are reintroduced.
+    return next(new AppError('Subscription cancellation is not applicable in the current payment setup', 400));
+};
 
 export const allPayments = async (req, res, next) => {
     try {
         const { count } = req.query;
 
-        const subscriptions = await razorpay.subscriptions.all({
+        const orders = await razorpay.orders.all({
             count: count || 10,
         });
 
         res.status(200).json({
             success: true,
             message: 'All Payments',
-            allPayments: subscriptions
+            allPayments: orders
         });
     } catch (e) {
         return next(new AppError(e.message, 500));

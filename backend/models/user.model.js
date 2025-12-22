@@ -12,6 +12,11 @@ const userSchema = new Schema({
         lowercase: true,
         trim: true
     },
+    username: {
+        type: String,
+        unique: true,
+        sparse: true // Allows null values to not violate unique constraint
+    },
     email: {
         type: String,
         required: [true, 'email is required'],

@@ -4,7 +4,7 @@ import { axiosInstance } from '../../Helpers/axiosInstance';
 
 const initialState = {
     key: "",
-    subscription_id: "",
+    order_id: "",
     isPaymentVerified: false,
     allPayments: {},
     finalMonths: {},
@@ -84,7 +84,7 @@ const razoraySlice = createSlice({
 
         // for purchase course bundle
         builder.addCase(purchaseCourseBundle.fulfilled, (state, action) => {
-            state.subscription_id = action?.payload?.subscription_id
+            state.order_id = action?.payload?.order_id
         })
 
         // for verify payment
