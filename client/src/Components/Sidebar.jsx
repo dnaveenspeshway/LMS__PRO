@@ -37,7 +37,7 @@ export default function Sidebar({ hideBar = false }) {
     drawerSide[0].style.width = "0";
   }
 
-  if (!hideBar) {
+  if (isLoggedIn && !hideBar) {
     return (
       <div className="drawer absolute left-0 z-50 w-fit">
         <input className="drawer-toggle" id="my-drawer" type="checkbox" />
@@ -64,17 +64,8 @@ export default function Sidebar({ hideBar = false }) {
                 <AiFillCloseCircle size={28} />
               </button>
             </li>
-            <li>
-              <Link to="/" className="flex gap-4 items-center">
-                <FaHome
-                  size={18}
-                  className="text-gray-500 dark:text-slate-100"
-                />
-                Home
-              </Link>
-            </li>
 
-            {role === "ADMIN" && (
+            {isLoggedIn && role === "ADMIN" && (
               <li>
                 <Link to="/admin/dashboard" className="flex gap-4 items-center">
                   <FaUserCircle
@@ -86,7 +77,7 @@ export default function Sidebar({ hideBar = false }) {
               </li>
             )}
 
-            {role === "ADMIN" && (
+            {isLoggedIn && role === "ADMIN" && (
               <li>
                 <Link to="/course/create" className="flex gap-4 items-center">
                   <FaPlus
@@ -108,41 +99,8 @@ export default function Sidebar({ hideBar = false }) {
               </Link>
             </li>
 
-            <li>
-              <Link to="/contact" className="flex gap-4 items-center">
-                <FaPhone
-                  size={18}
-                  className="text-gray-500 dark:text-slate-100"
-                />
-                Contact Us
-              </Link>
-            </li>
-
-            <li>
-              <Link to="/about" className="flex gap-4 items-center">
-                <FaInfoCircle
-                  size={18}
-                  className="text-gray-500 dark:text-slate-100"
-                />
-                About Us
-              </Link>
-            </li>
-
             {isLoggedIn ? (
-              <li className="absolute bottom-4 w-[90%]">
-                <div className="w-full flex md:flex-row flex-col gap-2 items-center justify-center">
-                  <button className="btn-primary px-3.5 py-2.5 font-semibold rounded-md w-full">
-                    <Link to="/user/profile">Profile</Link>
-                  </button>
-                  <button
-                    className="btn-secondary px-3.5 py-2.5 font-semibold rounded-md w-full"
-                    onClick={onLogout}
-                    disabled={isLoading}
-                  >
-                    <Link>{isLoading ? "Logout..." : "Logout"}</Link>
-                  </button>
-                </div>
-              </li>
+              null
             ) : (
               <li className="absolute bottom-4 w-[90%]">
                 <div className="w-full flex items-center justify-center">
@@ -160,4 +118,5 @@ export default function Sidebar({ hideBar = false }) {
       </div>
     );
   }
+  return <></>;
 }
