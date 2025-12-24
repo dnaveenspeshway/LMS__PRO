@@ -7,6 +7,7 @@ import InputBox from "../../Components/InputBox/InputBox";
 import TextArea from "../../Components/InputBox/TextArea";
 import Layout from "../../Layout/Layout";
 import { AiOutlineArrowLeft } from "react-icons/ai";
+import { axiosInstance } from "../../Helpers/axiosInstance";
 
 export default function AddLecture() {
   const courseDetails = useLocation().state;
@@ -28,9 +29,20 @@ export default function AddLecture() {
 
   function handleInputChange(e) {
     const { name, value } = e.target;
-    setUserInput({
-      ...userInput,
-      [name]: value,
+    setUserInput((prevInput) => {
+      const newState = {
+        ...prevInput,
+        [name]: value,
+      };
+
+      if (name === "videoUrl" && value) {
+        newState.lecture = undefined;
+        newState.videoSrc = "";
+      } else if (name === "lecture" && value) {
+        newState.videoUrl = "";
+        newState.duration = "";
+      }
+      return newState;
     });
   }
 
@@ -52,6 +64,7 @@ export default function AddLecture() {
         lecture: videoFile,
         videoSrc: source,
         duration: formattedDuration,
+        videoUrl: "", // Clear videoUrl when a file is selected
       }));
     };
     videoElement.src = source;
@@ -101,7 +114,22 @@ export default function AddLecture() {
 
   useEffect(() => {
     if (!courseDetails) navigate("/courses");
-  }, []);
+
+    const fetchVideoDuration = async () => {
+      if (userInput.videoUrl) {
+        try {
+          const response = await axiosInstance.post('/courses/get-video-duration', { videoUrl: userInput.videoUrl });
+          setUserInput((prevInput) => ({ ...prevInput, duration: response.data.duration }));
+        } catch (error) {
+          console.error("Error fetching video duration:", error);
+          toast.error("Failed to fetch video duration.");
+          setUserInput((prevInput) => ({ ...prevInput, duration: "" }));
+        }
+      }
+    };
+
+    fetchVideoDuration();
+  }, [courseDetails, navigate, userInput.videoUrl]);
 
   return (
     <Layout>

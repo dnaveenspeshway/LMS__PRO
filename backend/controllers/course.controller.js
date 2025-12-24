@@ -3,6 +3,32 @@ import AppError from '../utils/error.utils.js';
 import cloudinary from 'cloudinary';
 import fs from 'fs';
 import { videoDuration } from "@numairawan/video-duration";
+import axios from 'axios';
+
+// Helper function to convert ISO 8601 duration to a readable format
+const convertIsoToDuration = (isoDuration) => {
+    const regex = /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/;
+    const matches = isoDuration.match(regex);
+
+    if (!matches) {
+        return '';
+    }
+
+    const hours = parseInt(matches[1] || '0', 10);
+    const minutes = parseInt(matches[2] || '0', 10);
+    const seconds = parseInt(matches[3] || '0', 10);
+
+    let formattedDuration = '';
+    if (hours > 0) {
+        formattedDuration += `${hours}h `;
+    }
+    if (minutes > 0 || hours > 0) { // Show minutes if there are hours or minutes
+        formattedDuration += `${minutes}m `;
+    }
+    formattedDuration += `${seconds}s`;
+
+    return formattedDuration.trim();
+};
 
 // get all courses
 const getAllCourses = async (req, res, next) => {
@@ -179,17 +205,8 @@ const { title, description, videoUrl, duration } = req.body;
 
         let lectureDuration = duration; // Use provided duration if available
 
-        if (videoUrl && !lectureDuration) {
-            try {
-                const fetchedDuration = await videoDuration(videoUrl);
-                // Format duration as needed, e.g., "1h 30m" or "90m"
-                // For simplicity, let's store in seconds for now and format on frontend if needed
-                lectureDuration = `${Math.round(fetchedDuration / 60)}m`; // Example: convert seconds to minutes
-            } catch (error) {
-                console.error("Error fetching video duration:", error);
-                // Optionally, handle error or proceed without duration
-            }
-        }
+        // If videoUrl is provided, duration will be fetched from YouTube API via frontend
+        // No need to fetch duration here for videoUrl
 
         const lectureData = {
             title,
@@ -210,7 +227,7 @@ const { title, description, videoUrl, duration } = req.body;
                     lectureData.lecture.secure_url = result.secure_url;
                 }
 
-                if (!lectureDuration) {
+                if (!lectureDuration && req.file) {
                     const fetchedDuration = await videoDuration(req.file.path);
                     lectureDuration = `${Math.round(fetchedDuration / 60)}m`;
                 }
@@ -299,14 +316,8 @@ const updateCourseLecture = async (req, res, next) => {
 
         let lectureDuration = duration; // Use provided duration if available
 
-        if (videoUrl && !lectureDuration) {
-            try {
-                const fetchedDuration = await videoDuration(videoUrl);
-                lectureDuration = `${Math.round(fetchedDuration / 60)}m`;
-            } catch (error) {
-                console.error("Error fetching video duration:", error);
-            }
-        }
+        // If videoUrl is provided, duration will be fetched from YouTube API via frontend
+        // No need to fetch duration here for videoUrl
 
         const updatedLectureData = {
             title,
@@ -335,7 +346,7 @@ const updateCourseLecture = async (req, res, next) => {
                     updatedLectureData.lecture.secure_url = result.secure_url;
                 }
 
-                if (!lectureDuration) {
+                if (!lectureDuration && req.file) {
                     const fetchedDuration = await videoDuration(req.file.path);
                     lectureDuration = `${Math.round(fetchedDuration / 60)}m`;
                 }
@@ -365,6 +376,53 @@ const updateCourseLecture = async (req, res, next) => {
     }
 };
 
+const getVideoDuration = async (req, res, next) => {
+    try {
+        const { videoUrl } = req.body;
+
+        if (!videoUrl) {
+            return next(new AppError('Video URL is required', 400));
+        }
+
+        // Extract video ID from YouTube URL
+        const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=|embed\/|v\/|)([^\&\?\n]{11})/;
+        const match = videoUrl.match(youtubeRegex);
+
+        if (!match || !match[1]) {
+            return next(new AppError('Invalid YouTube video URL', 400));
+        }
+
+        const videoId = match[1];
+
+        const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
+
+        if (!YOUTUBE_API_KEY) {
+            return next(new AppError('YouTube API key not configured', 500));
+        }
+
+        const youtubeApiUrl = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=contentDetails&key=${YOUTUBE_API_KEY}`;
+
+        const response = await axios.get(youtubeApiUrl);
+        const items = response.data.items;
+
+        if (items.length === 0) {
+            return next(new AppError('YouTube video not found', 404));
+        }
+
+        const isoDuration = items[0].contentDetails.duration;
+        const formattedDuration = convertIsoToDuration(isoDuration);
+
+        res.status(200).json({
+            success: true,
+            message: 'Video duration fetched successfully',
+            duration: formattedDuration
+        });
+    } catch (e) {
+        console.error("Error in getVideoDuration:", e);
+        return next(new AppError(`Failed to fetch video duration: ${e.message}`, 500));
+    }
+};
+
 
 export {
     getAllCourses,
@@ -374,5 +432,6 @@ export {
     removeCourse,
     addLectureToCourseById,
     deleteCourseLecture,
-    updateCourseLecture
+    updateCourseLecture,
+    getVideoDuration
 }

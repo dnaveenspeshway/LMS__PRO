@@ -1,6 +1,7 @@
 import { useDispatch, useSelector } from "react-redux";
 import { Link, useNavigate } from "react-router-dom";
 import { logout } from "../Redux/Slices/AuthSlice";
+import { FiMenu } from "react-icons/fi";
 
 export default function Navbar() {
   const dispatch = useDispatch();
@@ -12,10 +13,22 @@ export default function Navbar() {
     navigate("/");
   };
 
+  const toggleSidebar = () => {
+    const drawerToggle = document.getElementById("my-drawer");
+    if (drawerToggle) {
+      drawerToggle.checked = !drawerToggle.checked;
+    }
+  };
+
   return (
     <nav className="sticky top-0 z-50 md:h-[72px] h-[65px] md:px-[35px] px-[15px] bg-[#ffffffd0] dark:bg-[#21242bc5] shadow-custom backdrop-blur-md flex justify-between items-center">
-      {/* Left section: Logo */}
-      <div className="text-2xl font-bold text-purple-600 pl-16">LMS</div>
+      {/* Left section: Sidebar toggle and Logo */}
+      <div className="flex items-center gap-2">
+        <button onClick={toggleSidebar} className="p-2 rounded-full text-lg font-semibold">
+          <FiMenu size={"32px"} className="text-gray-900 dark:text-white" />
+        </button>
+        <div className="text-2xl font-bold text-purple-600">LMS</div>
+      </div>
 
       {/* Middle section: Navigation links */}
       <div className="flex items-center gap-5">
