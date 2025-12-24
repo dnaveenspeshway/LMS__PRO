@@ -24,6 +24,7 @@ export default function AddLecture() {
     description: "",
     videoSrc: "",
     videoUrl: "",
+    driveUrl: "", // New field for Google Drive URL
     duration: "",
   });
 
@@ -38,8 +39,14 @@ export default function AddLecture() {
       if (name === "videoUrl" && value) {
         newState.lecture = undefined;
         newState.videoSrc = "";
+        newState.driveUrl = ""; // Clear driveUrl when videoUrl is entered
+      } else if (name === "driveUrl" && value) {
+        newState.lecture = undefined;
+        newState.videoSrc = "";
+        newState.videoUrl = ""; // Clear videoUrl when driveUrl is entered
       } else if (name === "lecture" && value) {
         newState.videoUrl = "";
+        newState.driveUrl = ""; // Clear driveUrl when lecture file is selected
         newState.duration = "";
       }
       return newState;
@@ -72,13 +79,13 @@ export default function AddLecture() {
 
   async function onFormSubmit(e) {
     e.preventDefault();
-    if ((!userInput.lecture && !userInput.videoUrl) || !userInput.title || !userInput.description) {
-      toast.error("All fields are mandatory, and either a video file or a video URL must be provided.");
+    if ((!userInput.lecture && !userInput.videoUrl && !userInput.driveUrl) || !userInput.title || !userInput.description) {
+      toast.error("All fields are mandatory, and either a video file, a YouTube URL, or a Drive URL must be provided.");
       return;
     }
 
-    if (userInput.lecture && userInput.videoUrl) {
-      toast.error("Please provide either a video file or a video URL, not both.");
+    if ((userInput.lecture && userInput.videoUrl) || (userInput.lecture && userInput.driveUrl) || (userInput.videoUrl && userInput.driveUrl)) {
+      toast.error("Please provide only one of: a video file, a YouTube URL, or a Drive URL.");
       return;
     }
 
@@ -87,6 +94,8 @@ export default function AddLecture() {
     const formData = new FormData();
     if (userInput.lecture) {
       formData.append("lecture", userInput.lecture);
+    } else if (userInput.driveUrl) {
+      formData.append("videoUrl", userInput.driveUrl); // Send driveUrl as videoUrl to backend
     } else if (userInput.videoUrl) {
       formData.append("videoUrl", userInput.videoUrl);
     }
@@ -106,6 +115,7 @@ export default function AddLecture() {
         description: "",
         videoSrc: "",
         videoUrl: "",
+        driveUrl: "", // Clear driveUrl after submission
         duration: "",
       });
     }
@@ -116,9 +126,10 @@ export default function AddLecture() {
     if (!courseDetails) navigate("/courses");
 
     const fetchVideoDuration = async () => {
-      if (userInput.videoUrl) {
+      if (userInput.videoUrl || userInput.driveUrl) {
         try {
-          const response = await axiosInstance.post('/courses/get-video-duration', { videoUrl: userInput.videoUrl });
+          const urlToFetch = userInput.driveUrl || userInput.videoUrl;
+          const response = await axiosInstance.post('/courses/get-video-duration', { videoUrl: urlToFetch });
           setUserInput((prevInput) => ({ ...prevInput, duration: response.data.duration }));
         } catch (error) {
           console.error("Error fetching video duration:", error);
@@ -129,7 +140,7 @@ export default function AddLecture() {
     };
 
     fetchVideoDuration();
-  }, [courseDetails, navigate, userInput.videoUrl]);
+  }, [courseDetails, navigate, userInput.videoUrl, userInput.driveUrl]);
 
   return (
     <Layout>
@@ -216,6 +227,15 @@ export default function AddLecture() {
                 placeholder={"Enter Video URL"}
                 onChange={handleInputChange}
                 value={userInput.videoUrl}
+              />
+              {/* drive url */}
+              <InputBox
+                label={"Drive URL"}
+                name={"driveUrl"}
+                type={"text"}
+                placeholder={"Enter Google Drive Video URL"}
+                onChange={handleInputChange}
+                value={userInput.driveUrl}
               />
               {/* duration */}
               <InputBox

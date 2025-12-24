@@ -4,6 +4,7 @@ import cloudinary from 'cloudinary';
 import fs from 'fs';
 import { videoDuration } from "@numairawan/video-duration";
 import axios from 'axios';
+import { google } from 'googleapis';
 
 // Helper function to convert ISO 8601 duration to a readable format
 const convertIsoToDuration = (isoDuration) => {
@@ -17,6 +18,29 @@ const convertIsoToDuration = (isoDuration) => {
     const hours = parseInt(matches[1] || '0', 10);
     const minutes = parseInt(matches[2] || '0', 10);
     const seconds = parseInt(matches[3] || '0', 10);
+
+    let formattedDuration = '';
+    if (hours > 0) {
+        formattedDuration += `${hours}h `;
+    }
+    if (minutes > 0 || hours > 0) { // Show minutes if there are hours or minutes
+        formattedDuration += `${minutes}m `;
+    }
+    formattedDuration += `${seconds}s`;
+
+    return formattedDuration.trim();
+};
+
+// Helper function to convert milliseconds to a readable duration format (e.g., "1h 2m 3s")
+const convertMillisToDuration = (millis) => {
+    if (isNaN(millis) || millis < 0) {
+        return '';
+    }
+
+    const totalSeconds = Math.floor(millis / 1000);
+    const hours = Math.floor(totalSeconds / 3600);
+    const minutes = Math.floor((totalSeconds % 3600) / 60);
+    const seconds = totalSeconds % 60;
 
     let formattedDuration = '';
     if (hours > 0) {
@@ -384,39 +408,76 @@ const getVideoDuration = async (req, res, next) => {
             return next(new AppError('Video URL is required', 400));
         }
 
-        // Extract video ID from YouTube URL
+        // Check if it's a YouTube URL
         const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=|embed\/|v\/|)([^\&\?\n]{11})/;
-        const match = videoUrl.match(youtubeRegex);
+        const youtubeMatch = videoUrl.match(youtubeRegex);
 
-        if (!match || !match[1]) {
-            return next(new AppError('Invalid YouTube video URL', 400));
+        // Check if it's a Google Drive URL
+        const googleDriveRegex = /(?:https?:\/\/)?drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)(?:\/view)?(?:\?usp=sharing)?/;
+        const googleDriveMatch = videoUrl.match(googleDriveRegex);
+
+        if (youtubeMatch && youtubeMatch[1]) {
+            const videoId = youtubeMatch[1];
+            const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
+
+            if (!YOUTUBE_API_KEY) {
+                return next(new AppError('YouTube API key not configured', 500));
+            }
+
+            const youtubeApiUrl = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=contentDetails&key=${YOUTUBE_API_KEY}`;
+            const response = await axios.get(youtubeApiUrl);
+            const items = response.data.items;
+
+            if (items.length === 0) {
+                return next(new AppError('YouTube video not found', 404));
+            }
+
+            const isoDuration = items[0].contentDetails.duration;
+            const formattedDuration = convertIsoToDuration(isoDuration);
+
+            res.status(200).json({
+                success: true,
+                message: 'Video duration fetched successfully',
+                duration: formattedDuration
+            });
+        } else if (googleDriveMatch && googleDriveMatch[1]) {
+            const fileId = googleDriveMatch[1];
+
+            // Authenticate with Google Drive API using service account
+            const auth = new google.auth.GoogleAuth({
+                keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS, // Path to your service account key file
+                scopes: ['https://www.googleapis.com/auth/drive.readonly'],
+            });
+            const authClient = await auth.getClient();
+            google.options({auth: authClient});
+            const drive = google.drive({ version: 'v3' });
+
+            try {
+                const response = await drive.files.get({
+                    fileId: fileId,
+                    fields: 'videoMediaMetadata', // Request video metadata
+                });
+
+                const durationMillis = response.data.videoMediaMetadata?.durationMillis;
+
+                if (durationMillis === undefined) {
+                    return next(new AppError('Google Drive video duration not found or not a video file', 404));
+                }
+
+                const formattedDuration = convertMillisToDuration(parseInt(durationMillis, 10));
+
+                res.status(200).json({
+                    success: true,
+                    message: 'Google Drive video duration fetched successfully',
+                    duration: formattedDuration
+                });
+            } catch (error) {
+                console.error("Error fetching Google Drive video duration:", error);
+                return next(new AppError(`Failed to fetch Google Drive video duration: ${error.message}`, 500));
+            }
+        } else {
+            return next(new AppError('Invalid video URL. Please provide a valid YouTube or Google Drive URL.', 400));
         }
-
-        const videoId = match[1];
-
-        const YOUTUBE_API_KEY = process.env.YOUTUBE_API_KEY;
-
-        if (!YOUTUBE_API_KEY) {
-            return next(new AppError('YouTube API key not configured', 500));
-        }
-
-        const youtubeApiUrl = `https://www.googleapis.com/youtube/v3/videos?id=${videoId}&part=contentDetails&key=${YOUTUBE_API_KEY}`;
-
-        const response = await axios.get(youtubeApiUrl);
-        const items = response.data.items;
-
-        if (items.length === 0) {
-            return next(new AppError('YouTube video not found', 404));
-        }
-
-        const isoDuration = items[0].contentDetails.duration;
-        const formattedDuration = convertIsoToDuration(isoDuration);
-
-        res.status(200).json({
-            success: true,
-            message: 'Video duration fetched successfully',
-            duration: formattedDuration
-        });
     } catch (e) {
         console.error("Error in getVideoDuration:", e);
         return next(new AppError(`Failed to fetch video duration: ${e.message}`, 500));
