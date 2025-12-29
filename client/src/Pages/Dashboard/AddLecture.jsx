@@ -22,6 +22,8 @@ export default function AddLecture() {
     lecture: undefined,
     title: "",
     description: "",
+    content: "", // New field for written content
+    resources: undefined, // New field for resource file
     videoSrc: "",
     videoUrl: "",
     driveUrl: "", // New field for Google Drive URL
@@ -53,6 +55,14 @@ export default function AddLecture() {
     });
   }
 
+  function handleResource(e) {
+    const resourceFile = e.target.files[0];
+    setUserInput((prevInput) => ({
+      ...prevInput,
+      resources: resourceFile,
+    }));
+  }
+
   function handleVideo(e) {
     const videoFile = e.target.files[0];
     const source = window.URL.createObjectURL(videoFile);
@@ -79,8 +89,13 @@ export default function AddLecture() {
 
   async function onFormSubmit(e) {
     e.preventDefault();
-    if ((!userInput.lecture && !userInput.videoUrl && !userInput.driveUrl) || !userInput.title || !userInput.description) {
-      toast.error("All fields are mandatory, and either a video file, a YouTube URL, or a Drive URL must be provided.");
+    if (!userInput.title || !userInput.description) {
+      toast.error("Title and Description are mandatory.");
+      return;
+    }
+
+    if (!userInput.lecture && !userInput.videoUrl && !userInput.driveUrl && !userInput.content) {
+      toast.error("Please provide at least one of: Video, YouTube URL, Drive URL, or Written Content.");
       return;
     }
 
@@ -99,8 +114,14 @@ export default function AddLecture() {
     } else if (userInput.videoUrl) {
       formData.append("videoUrl", userInput.videoUrl);
     }
+
+    if (userInput.resources) {
+      formData.append("resources", userInput.resources);
+    }
+
     formData.append("title", userInput.title);
     formData.append("description", userInput.description);
+    formData.append("content", userInput.content);
     formData.append("duration", userInput.duration);
 
     const data = { formData, id: userInput.id };
@@ -113,9 +134,11 @@ export default function AddLecture() {
         lecture: undefined,
         title: "",
         description: "",
+        content: "",
+        resources: undefined,
         videoSrc: "",
         videoUrl: "",
-        driveUrl: "", // Clear driveUrl after submission
+        driveUrl: "", 
         duration: "",
       });
     }
@@ -236,12 +259,35 @@ export default function AddLecture() {
               <TextArea
                 label={"Description"}
                 name={"description"}
-                rows={5}
+                rows={3}
                 type={"text"}
                 placeholder={"Enter Lecture Description"}
                 onChange={handleInputChange}
                 value={userInput.description}
               />
+              {/* written content */}
+              <TextArea
+                label={"Written Content (Optional)"}
+                name={"content"}
+                rows={6}
+                type={"text"}
+                placeholder={"Enter Written Lesson Content"}
+                onChange={handleInputChange}
+                value={userInput.content}
+              />
+              {/* resource file */}
+              <div className="flex flex-col gap-1">
+                <label htmlFor="resources" className="text-lg font-semibold dark:text-white">
+                  Resource File (Optional)
+                </label>
+                <input
+                  type="file"
+                  id="resources"
+                  name="resources"
+                  onChange={handleResource}
+                  className="bg-transparent border px-2 py-1 rounded-sm focus:outline-none focus:border-yellow-500"
+                />
+              </div>
               {/* video url */}
               <InputBox
                 label={"Video URL"}
