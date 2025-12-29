@@ -1,6 +1,6 @@
 import React from "react";
 import { useNavigate } from "react-router-dom";
-import { FaPlay, FaBook, FaUser } from "react-icons/fa";
+import { FaPlay, FaBook, FaUser, FaRupeeSign } from "react-icons/fa";
 
 export default function CourseCard({ data }) {
   const navigate = useNavigate();
@@ -34,6 +34,12 @@ export default function CourseCard({ data }) {
           <FaBook className="text-yellow-500 dark:text-yellow-400" />
           <p className="text-base font-semibold">
             Total lectures: {data?.numberoflectures}
+          </p>
+        </div>
+        <div className="flex items-center space-x-2">
+          <FaRupeeSign className="text-yellow-500 dark:text-yellow-400" />
+          <p className="text-base font-semibold">
+            Price: {data?.price}
           </p>
         </div>
         <div className="flex items-center space-x-2">

@@ -29,6 +29,12 @@ export default function CourseDescription() {
               <div className="flex flex-col text-lg font-inter">
                 <p className="font-semibold">
                   <span className="text-yellow-600 dark:text-yellow-500 font-bold">
+                    Price:{" "}
+                  </span>
+                  {state?.price}
+                </p>
+                <p className="font-semibold">
+                  <span className="text-yellow-600 dark:text-yellow-500 font-bold">
                     Total lectures:{" "}
                   </span>
                   {state?.numberOfLectures}

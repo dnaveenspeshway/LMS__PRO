@@ -92,17 +92,25 @@ const getLecturesByCourseId = async (req, res, next) => {
 // create course
 const createCourse = async (req, res, next) => {
     try {
-        const { title, description, category, createdBy } = req.body;
+        console.log("createCourse req.body:", req.body);
+        const { title, description, category, createdBy, price } = req.body;
 
-        if (!title || !description || !category || !createdBy) {
-            return next(new AppError('All fields are required', 400));
+        if (!title || !description || !category || !createdBy || !price) {
+            const missing = [];
+            if (!title) missing.push('title');
+            if (!description) missing.push('description');
+            if (!category) missing.push('category');
+            if (!createdBy) missing.push('createdBy');
+            if (!price) missing.push('price');
+            return next(new AppError(`All fields are required. Missing: ${missing.join(', ')}`, 400));
         }
 
         const course = await courseModel.create({
             title,
             description,
             category,
-            createdBy
+            createdBy,
+            price
         })
 
         if (!course) {

@@ -19,6 +19,11 @@ const courseSchema = new Schema({
         type: String,
         required: [true, 'Category is required'],
     },
+    price: {
+        type: Number,
+        required: [true, 'Price is required'],
+        default: 0
+    },
     thumbnail: {
         public_id: {
             type: String

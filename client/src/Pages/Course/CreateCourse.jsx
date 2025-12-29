@@ -53,7 +53,8 @@ export default function CreateCourse() {
       !userInput.description ||
       !userInput.category ||
       !userInput.createdBy ||
-      !userInput.thumbnail
+      !userInput.thumbnail ||
+      !userInput.price
     ) {
       toast.error("All field are required!");
       return;
@@ -65,6 +66,7 @@ export default function CreateCourse() {
     formData.append("description", userInput.description);
     formData.append("category", userInput.category);
     formData.append("createdBy", userInput.createdBy);
+    formData.append("price", userInput.price);
     formData.append("thumbnail", userInput.thumbnail);
 
     const response = await dispatch(createNewCourse(formData));
@@ -76,6 +78,7 @@ export default function CreateCourse() {
         description: "",
         thumbnail: null,
         previewImage: "",
+        price: "",
       });
     }
     setIsCreatingCourse(false);
@@ -128,6 +131,14 @@ export default function CreateCourse() {
                 placeholder={"Enter Course Title"}
                 onChange={handleUserInput}
                 value={userInput.title}
+              />
+              <InputBox
+                label={"Price"}
+                name={"price"}
+                type={"number"}
+                placeholder={"Enter Course Price"}
+                onChange={handleUserInput}
+                value={userInput.price}
               />
             </div>
             <div className="md:w-[48%] w-full flex flex-col gap-5">

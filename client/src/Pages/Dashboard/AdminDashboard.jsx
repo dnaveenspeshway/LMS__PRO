@@ -250,6 +250,7 @@ export default function AdminDashboard() {
                         <td>{course?.category}</td>
                         <td>{course?.createdBy}</td>
                         <td>{course?.numberOfLectures}</td>
+                        <td>{course?.price}</td>
                         <td className="max-w-28  whitespace-nowrap">
                           <textarea
                             value={course?.description}
