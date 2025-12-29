@@ -6,9 +6,11 @@ const initialState = {
     key: "",
     order_id: "",
     isPaymentVerified: false,
-    allPayments: {},
+    allPayments: [],
     finalMonths: {},
-    monthlySalesRecord: []
+    monthlySalesRecord: [],
+    totalSubscriptions: 0,
+    totalRevenue: 0
 }
 
 // ....get razorpay key id.....
@@ -97,6 +99,8 @@ const razoraySlice = createSlice({
             state.allPayments = action?.payload?.allPayments;
             state.finalMonths = action?.payload?.finalMonths;
             state.monthlySalesRecord = action?.payload?.monthlySalesRecord;
+            state.totalSubscriptions = action?.payload?.totalSubscriptions;
+            state.totalRevenue = action?.payload?.totalRevenue;
         })
     }
 })

@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 
 import {
   ArcElement,
@@ -11,7 +11,6 @@ import {
   Tooltip,
 } from "chart.js";
 import { Bar, Pie } from "react-chartjs-2";
-
 import {
   BsCollectionPlayFill,
   BsTrash
@@ -19,12 +18,10 @@ import {
 import { FaUsers } from "react-icons/fa";
 import { FcSalesPerformance } from "react-icons/fc";
 import { GiMoneyStack } from "react-icons/gi";
-
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 import Layout from "../../Layout/Layout";
-
 import { deleteCourse, getAllCourses } from "../../Redux/Slices/CourseSlice";
 import { getPaymentRecord } from "../../Redux/Slices/RazorpaySlice";
 import { getStatsData } from "../../Redux/Slices/StatSlice";
@@ -44,16 +41,9 @@ export default function AdminDashboard() {
 
   const { allUsersCount, subscribedCount } = useSelector((state) => state.stat);
 
-  const { allPayments } = useSelector(
+  const { allPayments, totalRevenue, monthlySalesRecord } = useSelector(
     (state) => state.razorpay
   );
-  const monthlySalesRecord = new Array(12).fill(0);
-  if (allPayments?.allPayments) {
-    allPayments.allPayments.forEach((payment) => {
-      const monthNumber = new Date(payment.createdAt).getMonth();
-      monthlySalesRecord[monthNumber] += 1;
-    });
-  }
 
   const userData = {
     labels: ["Registered User", "Enrolled User"],
@@ -113,7 +103,7 @@ export default function AdminDashboard() {
       await dispatch(getStatsData());
       await dispatch(getPaymentRecord());
     })();
-  }, []);
+  }, [dispatch]);
 
   return (
     <Layout hideFooter={true}>
@@ -191,20 +181,20 @@ export default function AdminDashboard() {
                       Subscription Count
                     </p>
                     <h3 className="md:text-4xl text-xl font-inter font-bold">
-                      {allPayments?.count}
+                      {subscribedCount}
                     </h3>
                   </div>
                   <FcSalesPerformance className="text-yellow-500 text-5xl" />
                 </div>
 
                 {/* total revenue */}
-                <div className="flex  items-center relative h-32 justify-center p-5 gap-5 rounded-md shadow-md">
+                <div className="flex  items-center relative h-32 justify-between p-5 gap-5 rounded-md shadow-md">
                   <div className="flex flex-col items-center mt-3 justify-center">
                     <p className="font-semibold text-gray-700 dark:text-white md:static absolute top-3 left-3">
                       Total Revenue
                     </p>
                     <h3 className="md:text-4xl text-xl font-inter font-bold">
-                      {allPayments?.count * 499}
+                      {totalRevenue?.toLocaleString()}
                     </h3>
                   </div>
                   <GiMoneyStack className="text-green-500 text-5xl" />

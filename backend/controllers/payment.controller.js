@@ -121,18 +121,65 @@ export const cancelSubscription = async (req, res, next) => {
 
 export const allPayments = async (req, res, next) => {
     try {
-        const { count } = req.query;
+        const { count, skip } = req.query;
 
-        const orders = await razorpay.orders.all({
-            count: count || 10,
+        // Fetch all payments from our database instead of Razorpay API
+        // This ensures the data is "real" to this specific project
+        const allPayments = await paymentModel.find({}).sort({ createdAt: -1 });
+
+        const monthNames = [
+            "January", "February", "March", "April", "May", "June",
+            "July", "August", "September", "October", "November", "December"
+        ];
+        
+        const finalMonths = {
+            January: 0, February: 0, March: 0, April: 0, May: 0, June: 0,
+            July: 0, August: 0, September: 0, October: 0, November: 0, December: 0
+        };
+
+        const parsedData = allPayments.map((payment) => {
+            const monthInNumber = new Date(payment.createdAt).getMonth();
+            return monthNames[monthInNumber];
         });
+
+        for (const month of parsedData) {
+            if (finalMonths.hasOwnProperty(month)) {
+                finalMonths[month] = finalMonths[month] + 1;
+            }
+        }
+
+        const monthlySalesRecord = Object.values(finalMonths);
+
+        const totalSubscriptions = allPayments.length;
+
+        // Since amount is not stored in the Payment model yet, 
+        // we can either fetch from Razorpay for each ID or use a placeholder/calculated value.
+        // For now, let's fetch the total revenue from Razorpay but we should ideally store it in DB.
+        const razorpayPayments = await razorpay.payments.all({
+            count: 100,
+        });
+
+        // Filter Razorpay payments to only include those in our database
+        const dbPaymentIds = allPayments.map(p => p.razorpay_payment_id);
+        const filteredPayments = razorpayPayments.items.filter(p => dbPaymentIds.includes(p.id));
+
+        const totalRevenue = filteredPayments.reduce((acc, payment) => {
+            if (payment.status === 'captured') {
+                return acc + (payment.amount / 100);
+            }
+            return acc;
+        }, 0);
 
         res.status(200).json({
             success: true,
             message: 'All Payments',
-            allPayments: orders
+            allPayments,
+            totalSubscriptions,
+            totalRevenue: Math.round(totalRevenue * 100) / 100,
+            monthlySalesRecord
         });
     } catch (e) {
+        console.error("Error fetching payments:", e);
         return next(new AppError(e.message, 500));
     }
 };
