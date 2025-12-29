@@ -461,10 +461,36 @@ const getCourseProgress = async (req, res, next) => {
 const getMyCourses = async (req, res, next) => {
     try {
         const userId = req.user.id;
-        const user = await userModel.findById(userId).populate('courseProgress.courseId');
+        let user = await userModel.findById(userId).populate('courseProgress.courseId');
         
         if (!user) {
             return next(new AppError('User not found', 404));
+        }
+
+        // Self-healing: Check if active subscription exists but not in courseProgress
+        if (user.subscription && user.subscription.status === 'active' && user.subscription.courseId) {
+            const subCourseId = user.subscription.courseId.toString();
+            const isEnrolled = user.courseProgress.some(cp => 
+                cp.courseId && cp.courseId._id.toString() === subCourseId
+            );
+
+            if (!isEnrolled) {
+                await userModel.updateOne(
+                    { _id: userId },
+                    { 
+                        $push: { 
+                            courseProgress: {
+                                courseId: user.subscription.courseId,
+                                lecturesCompleted: [],
+                                quizScores: [],
+                                isCompleted: false
+                            }
+                        }
+                    }
+                );
+                // Refetch user to get the populated data for the new course
+                user = await userModel.findById(userId).populate('courseProgress.courseId');
+            }
         }
 
         // Filter out any null courseIds (in case course was deleted)

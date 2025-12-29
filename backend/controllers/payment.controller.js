@@ -83,6 +83,24 @@ export const verifySubscription = async (req, res, next) => {
         })
 
         user.subscription.status = 'active';
+
+        // Add the course to the user's courseProgress
+        if (user.subscription.courseId) {
+            const courseId = user.subscription.courseId;
+            const isAlreadyEnrolled = user.courseProgress.some(
+                (cp) => cp.courseId && cp.courseId.toString() === courseId.toString()
+            );
+
+            if (!isAlreadyEnrolled) {
+                user.courseProgress.push({
+                    courseId: courseId,
+                    lecturesCompleted: [],
+                    quizScores: [],
+                    isCompleted: false
+                });
+            }
+        }
+
         await user.save();
 
         res.status(200).json({
