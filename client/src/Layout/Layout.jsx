@@ -13,6 +13,8 @@ export default function Layout({ children, hideBar, hideNav, hideFooter }) {
         {/* sidebar */}
         <Sidebar hideBar={hideBar} />
 
+
+
         {/* main content */}
         {children}
 
