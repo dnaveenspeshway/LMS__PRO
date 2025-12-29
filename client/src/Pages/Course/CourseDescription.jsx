@@ -75,7 +75,7 @@ export default function CourseDescription() {
               </button>
             ) : (
               <button
-                onClick={() => navigate("/checkout")}
+                onClick={() => navigate("/checkout", { state: { coursePrice: state?.price, courseId: state?._id } })}
                 className="bg-orange-500 dark:bg-orange-600 text-white text-xl rounded-md font-bold px-5 py-3 w-full   transition-all ease-in-out duration-300"
               >
                 Subscribe

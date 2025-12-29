@@ -1,4 +1,5 @@
 import courseModel from '../models/course.model.js'
+import userModel from '../models/user.model.js'
 import AppError from '../utils/error.utils.js';
 import cloudinary from 'cloudinary';
 import fs from 'fs';
@@ -493,6 +494,73 @@ const getVideoDuration = async (req, res, next) => {
 };
 
 
+
+// add quiz to course by id
+const addQuizToCourse = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const { question, options, correctAnswer } = req.body;
+
+        if (!question || !options || !correctAnswer) {
+            return next(new AppError('All fields are required', 400));
+        }
+
+        const course = await courseModel.findById(id);
+
+        if (!course) {
+            return next(new AppError('Course not found', 404));
+        }
+
+        course.quizzes.push({
+            question,
+            options,
+            correctAnswer
+        });
+
+        await course.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Quiz added successfully',
+            course
+        });
+
+    } catch (e) {
+        return next(new AppError(e.message, 500));
+    }
+}
+// get enrolled students
+const getEnrolledStudents = async (req, res, next) => {
+    try {
+        const { id } = req.params;
+        const course = await courseModel.findById(id);
+        if (!course) {
+            return next(new AppError('Course not found', 404));
+        }
+
+        const enrolledStudents = await userModel.find({
+            'courseProgress.courseId': id
+        }).select('fullName email avatar courseProgress');
+
+        // Filter progress for this specific course
+        const studentsWithProgress = enrolledStudents.map(student => {
+            const progress = student.courseProgress.find(cp => cp.courseId.toString() === id);
+            return {
+                ...student.toObject(),
+                progress: progress
+            };
+        });
+
+        res.status(200).json({
+            success: true,
+            message: 'Enrolled students fetched successfully',
+            students: studentsWithProgress
+        });
+    } catch (e) {
+        return next(new AppError(e.message, 500));
+    }
+}
+
 export {
     getAllCourses,
     getLecturesByCourseId,
@@ -502,5 +570,7 @@ export {
     addLectureToCourseById,
     deleteCourseLecture,
     updateCourseLecture,
-    getVideoDuration
+    getVideoDuration,
+    addQuizToCourse,
+    getEnrolledStudents
 }

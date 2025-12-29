@@ -1,4 +1,5 @@
 import React, { useEffect } from "react";
+
 import {
   ArcElement,
   BarElement,
@@ -10,15 +11,21 @@ import {
   Tooltip,
 } from "chart.js";
 import { Bar, Pie } from "react-chartjs-2";
-import { BsCollectionPlayFill, BsTrash } from "react-icons/bs";
+
+import {
+  BsCollectionPlayFill,
+  BsTrash
+} from "react-icons/bs";
 import { FaUsers } from "react-icons/fa";
 import { FcSalesPerformance } from "react-icons/fc";
 import { GiMoneyStack } from "react-icons/gi";
+
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate } from "react-router-dom";
 
 import Layout from "../../Layout/Layout";
-import { getAllCourses, deleteCourse } from "../../Redux/Slices/CourseSlice";
+
+import { deleteCourse, getAllCourses } from "../../Redux/Slices/CourseSlice";
 import { getPaymentRecord } from "../../Redux/Slices/RazorpaySlice";
 import { getStatsData } from "../../Redux/Slices/StatSlice";
 ChartJS.register(
@@ -268,6 +275,17 @@ export default function AdminDashboard() {
                             }
                           >
                             <BsCollectionPlayFill />
+                          </button>
+                          <button
+                            className="bg-blue-500 text-white font-inter transition-all ease-in-out duration-300 text-xl py-2 px-4 rounded-md font-[500]"
+                            onClick={() =>
+                              navigate("/course/students", {
+                                state: { ...course },
+                              })
+                            }
+                            title="View Enrolled Students"
+                          >
+                            <FaUsers />
                           </button>
                           <button
                             className="bg-red-500 text-white  transition-all ease-in-out duration-300 text-xl py-2 px-4 rounded-md font-inter font-[500]"

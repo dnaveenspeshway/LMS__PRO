@@ -5,7 +5,10 @@ import {
   getCourseLectures,
   deleteCourseLecture,
 } from "../../Redux/Slices/LectureSlice";
+import { getUserProgress, updateProgress } from "../../Redux/Slices/AuthSlice";
+import { axiosInstance } from "../../Helpers/axiosInstance";
 import Layout from "../../Layout/Layout";
+import toast from "react-hot-toast";
 
 export default function DisplayLecture() {
   const navigate = useNavigate();
@@ -15,6 +18,13 @@ export default function DisplayLecture() {
   const { role } = useSelector((state) => state.auth);
 
   const [currentVideo, setCurrentVideo] = useState(0);
+  const [userProgress, setUserProgress] = useState({ lecturesCompleted: [] }); // New state for user progress
+
+  const totalLectures = state?.numberOfLectures || 0; // Define totalLectures
+  const completedLectures = userProgress.lecturesCompleted.length; // Calculate completedLectures
+
+  const isCourseCompleted = totalLectures > 0 && completedLectures >= totalLectures;
+  const progressPercentage = totalLectures > 0 ? Math.round((completedLectures / totalLectures) * 100) : 0;
 
   async function onLectureDelete(courseId, lectureId) {
     await dispatch(
@@ -24,9 +34,18 @@ export default function DisplayLecture() {
   }
 
   useEffect(() => {
-    if (!state) navigate("/courses");
-    dispatch(getCourseLectures(state._id));
-  }, []);
+    (async () => {
+      if (!state) {
+        navigate("/courses");
+        return;
+      }
+      await dispatch(getCourseLectures(state._id));
+      const progressRes = await dispatch(getUserProgress(state._id));
+      if (progressRes?.payload?.success) {
+        setUserProgress(progressRes.payload.progress);
+      }
+    })();
+  }, [state, dispatch, navigate]); // Add dependencies
   return (
     <Layout hideFooter={true} hideNav={true} hideBar={true}>
       <section className="flex flex-col gap-6 items-center md:py-8 py-0 px-0 h-screen overflow-y-scroll">
@@ -87,17 +106,40 @@ export default function DisplayLecture() {
             {/* right section for lectures list */}
             <div className="md:w-[48%] pb-12 md:flex-row flex-col w-full md:h-full h-[60%] overflow-y-scroll">
               <ul className="w-full md:p-2 p-0  flex flex-col gap-5 shadow-sm">
-                <li className="font-semibold bg-slate-50 dark:bg-slate-100 p-3 rounded-md shadow-lg sticky top-0 text-xl text-[#2320f7] font-nunito-sans flex items-center justify-between">
-                  <p>Lectures list</p>
-                  {role === "ADMIN" && (
-                    <button
-                      onClick={() =>
-                        navigate("/course/addlecture", { state: { ...state } })
-                      }
-                      className="btn-primary px-3 py-2 font-inter rounded-md font-semibold text-sm"
-                    >
-                      Add new lecture
-                    </button>
+                <li className="font-semibold bg-slate-50 dark:bg-slate-100 p-3 rounded-md shadow-lg sticky top-0 text-xl text-[#2320f7] font-nunito-sans flex flex-col gap-2">
+                  <div className="flex items-center justify-between w-full">
+                      <p>Lectures list</p>
+                      {role === "ADMIN" && (
+                        <div className="flex gap-2">
+                            <button
+                              onClick={() =>
+                                navigate("/course/addlecture", { state: { ...state } })
+                              }
+                              className="btn-primary px-3 py-2 font-inter rounded-md font-semibold text-sm"
+                            >
+                              Add new lecture
+                            </button>
+                            <button
+                              onClick={() =>
+                                navigate("/course/addquiz", { state: { ...state } })
+                              }
+                              className="btn-primary px-3 py-2 font-inter rounded-md font-semibold text-sm bg-purple-500 hover:bg-purple-600"
+                            >
+                              Add Quiz
+                            </button>
+                        </div>
+                      )}
+                  </div>
+                  {role === "USER" && (
+                      <div className="w-full">
+                        <div className="flex justify-between mb-1">
+                            <span className="text-sm font-medium text-blue-700 dark:text-blue-500">Progress</span>
+                            <span className="text-sm font-medium text-blue-700 dark:text-blue-500">{progressPercentage}%</span>
+                        </div>
+                        <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                            <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${progressPercentage}%` }}></div>
+                        </div>
+                      </div>
                   )}
                 </li>
                 {lectures &&
@@ -114,6 +156,9 @@ export default function DisplayLecture() {
                         >
                           <span className="font-inter">{idx + 1}. </span>
                           {lecture?.title}
+                          {userProgress?.lecturesCompleted?.includes(lecture?._id) && (
+                              <span className="ml-2 text-green-500 text-xs">✔ Watched</span>
+                          )}
                         </p>
                         {role === "ADMIN" && (
                           <button
@@ -129,6 +174,17 @@ export default function DisplayLecture() {
                     );
                   })}
               </ul>
+
+              {isCourseCompleted && (
+                  <div className="mt-5 w-full flex justify-center">
+                      <button 
+                          className="btn btn-success btn-lg text-white font-bold animate-pulse"
+                          onClick={handleCertificateDownload}
+                      >
+                          Download Certificate 🏆
+                      </button>
+                  </div>
+              )}
             </div>
           </div>
         </div>

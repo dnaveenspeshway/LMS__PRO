@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useLocation, useNavigate } from "react-router-dom";
 import Layout from "../../Layout/Layout";
 import { BiRupee } from "react-icons/bi";
 import {
@@ -14,13 +14,14 @@ import { getUserData } from "../../Redux/Slices/AuthSlice";
 export default function Checkout() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { state } = useLocation();
+  const coursePrice = state?.coursePrice || 499; // Default to 499 if no course price is passed
+  const courseId = state?.courseId;
   const rzorpayKey = useSelector((state) => state?.razorpay?.key);
   const [order_id, setOrder_id] = useState(
     useSelector((state) => state?.razorpay?.order_id)
   );
-  const isPaymentVerified = useSelector(
-    (state) => state?.razorpay?.isPaymentVerified
-  );
+
   const userData = useSelector((state) => state?.auth?.data);
   const paymentDetails = {
     razorpay_payment_id: "",
@@ -60,7 +61,7 @@ export default function Checkout() {
     const options = {
       key: rzorpayKey,
       order_id: order_id,
-      name: "Coursify Pvt Ltd",
+      name: "LMS",
       description: "subscription",
       theme: {
         color: "#fff",
@@ -117,7 +118,7 @@ export default function Checkout() {
       default:
         // If the user doesn't have a subscription, purchase a bundle
         (async () => {
-          const response = await dispatch(purchaseCourseBundle());
+          const response = await dispatch(purchaseCourseBundle({courseId, coursePrice}));
           if (response?.payload?.order_id) {
             setOrder_id(response.payload.order_id);
           }
@@ -145,7 +146,7 @@ export default function Checkout() {
 
               <p className="flex items-center justify-center gap-1 text-2xl font-bold text-yellow-500">
                 <BiRupee />
-                <span>499</span>
+                <span>{coursePrice}</span>
               </p>
 
               <div className="text-xs">

@@ -47,8 +47,32 @@ const userSchema = new Schema({
     forgotPasswordExpiry: Date,
     subscription: {
         id: String,
-        status: String
-    }
+        status: String,
+        courseId: {
+            type: Schema.Types.ObjectId,
+            ref: 'Course'
+        }
+    },
+    courseProgress: [
+        {
+            courseId: {
+                type: Schema.Types.ObjectId,
+                ref: 'Course'
+            },
+            lecturesCompleted: [String], // Store lecture IDs or public_ids
+            quizScores: [
+                {
+                    quizId: String,
+                    score: Number
+                }
+            ],
+            isCompleted: {
+                type: Boolean,
+                default: false
+            },
+            certificateUrl: String
+        }
+    ]
 },
     {
         timestamps: true

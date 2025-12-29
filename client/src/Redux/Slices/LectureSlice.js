@@ -55,6 +55,7 @@ const lectureSlice = createSlice({
         // for get Course Lectures
         builder.addCase(getCourseLectures.fulfilled, (state, action) => {
             state.lectures = action?.payload?.course?.lectures
+            state.quizzes = action?.payload?.course?.quizzes
         })
 
         // for add Course Lectures

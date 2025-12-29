@@ -36,8 +36,8 @@ const courseSchema = new Schema({
         {
             title: String,
             description: String,
-      duration: String, // New duration field
-      lecture: {
+            duration: String, // New duration field
+            lecture: {
                 public_id: {
                     type: String,
                     required: false
@@ -50,6 +50,24 @@ const courseSchema = new Schema({
             duration: {
                 type: String,
                 required: false
+            }
+        }
+    ],
+    quizzes: [
+        {
+            question: {
+                type: String,
+                required: true
+            },
+            options: [
+                {
+                    type: String,
+                    required: true
+                }
+            ],
+            correctAnswer: {
+                type: String,
+                required: true
             }
         }
     ],

@@ -1,4 +1,5 @@
 import userModel from "../models/user.model.js";
+import courseModel from "../models/course.model.js";
 import jwt from "jsonwebtoken";
 import crypto from 'crypto';
 import bcrypt from 'bcrypt';
@@ -323,6 +324,174 @@ const updateUser = async (req, res, next) => {
     }
 }
 
+import PDFDocument from 'pdfkit';
+
+const generateCertificate = async (req, res, next) => {
+    try {
+        const { courseId } = req.params;
+        const userId = req.user.id;
+
+        const user = await userModel.findById(userId);
+        if (!user) return next(new AppError('User not found', 404));
+
+        const courseProgress = user.courseProgress.find(cp => cp.courseId.toString() === courseId);
+        if (!courseProgress || !courseProgress.isCompleted) {
+            return next(new AppError('Course not completed yet', 400));
+        }
+
+        const course = await courseModel.findById(courseId);
+        if (!course) return next(new AppError('Course not found', 404));
+
+        const doc = new PDFDocument({
+            layout: 'landscape',
+            size: 'A4',
+        });
+
+        res.setHeader('Content-Type', 'application/pdf');
+        res.setHeader('Content-Disposition', `attachment; filename=certificate-${courseId}.pdf`);
+
+        doc.pipe(res);
+
+        // Certificate Content
+        doc.rect(0, 0, doc.page.width, doc.page.height).fill('#fff');
+        doc.lineWidth(20);
+        doc.strokeColor('#FFD700'); // Gold border
+        doc.rect(0, 0, doc.page.width, doc.page.height).stroke();
+
+        doc.fontSize(40).fillColor('#000').text('Certificate of Completion', { align: 'center', valign: 'center' });
+        doc.moveDown();
+        doc.fontSize(25).text('This is to certify that', { align: 'center' });
+        doc.moveDown();
+        doc.fontSize(35).fillColor('#2320f7').text(user.fullName, { align: 'center' });
+        doc.moveDown();
+        doc.fontSize(25).fillColor('#000').text('has successfully completed the course', { align: 'center' });
+        doc.moveDown();
+        doc.fontSize(35).fillColor('#2320f7').text(course.title, { align: 'center' });
+        doc.moveDown();
+        doc.fontSize(20).fillColor('#000').text(`Date: ${new Date().toLocaleDateString()}`, { align: 'center' });
+
+        doc.end();
+
+    } catch (e) {
+        return next(new AppError(e.message, 500));
+    }
+}
+
+const updateUserProgress = async (req, res, next) => {
+    try {
+        const { courseId, lectureId } = req.body;
+        const { id } = req.user;
+
+        if (!courseId || !lectureId) {
+            return next(new AppError("Course ID and Lecture ID are required", 400));
+        }
+
+        const user = await userModel.findById(id);
+        if (!user) {
+            return next(new AppError("User not found", 404));
+        }
+
+        const course = await courseModel.findById(courseId);
+        if (!course) {
+            return next(new AppError("Course not found", 404));
+        }
+
+        let courseProgress = user.courseProgress.find(
+            (progress) => progress.courseId.toString() === courseId
+        );
+
+        if (!courseProgress) {
+            courseProgress = {
+                courseId: courseId,
+                lecturesCompleted: [],
+                quizScores: [],
+                isCompleted: false,
+            };
+            user.courseProgress.push(courseProgress);
+        }
+
+        if (!courseProgress.lecturesCompleted.includes(lectureId)) {
+            courseProgress.lecturesCompleted.push(lectureId);
+        }
+
+        if (course.lectures.length > 0 && courseProgress.lecturesCompleted.length === course.lectures.length) {
+            courseProgress.isCompleted = true;
+        }
+
+        await user.save();
+
+        res.status(200).json({
+            success: true,
+            message: "User progress updated successfully",
+            courseProgress,
+        });
+    } catch (e) {
+        return next(new AppError(e.message, 500));
+    }
+}
+
+const getCourseProgress = async (req, res, next) => {
+    try {
+        const { courseId } = req.params;
+        const { id } = req.user;
+
+        const user = await userModel.findById(id);
+        if (!user) {
+            return next(new AppError("User not found", 404));
+        }
+
+        const courseProgress = user.courseProgress.find(
+            (progress) => progress.courseId.toString() === courseId
+        );
+
+        if (!courseProgress) {
+            return next(new AppError("Course progress not found for this user", 404));
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Course progress fetched successfully",
+            courseProgress,
+        });
+    } catch (e) {
+        return next(new AppError(e.message, 500));
+    }
+}
+
+const getMyCourses = async (req, res, next) => {
+    try {
+        const userId = req.user.id;
+        const user = await userModel.findById(userId).populate('courseProgress.courseId');
+        
+        if (!user) {
+            return next(new AppError('User not found', 404));
+        }
+
+        // Filter out any null courseIds (in case course was deleted)
+        const myCourses = user.courseProgress
+            .filter(cp => cp.courseId)
+            .map(cp => {
+                 return {
+                     ...cp.courseId.toObject(),
+                     progress: {
+                         lecturesCompleted: cp.lecturesCompleted,
+                         quizScores: cp.quizScores,
+                         isCompleted: cp.isCompleted,
+                         certificateUrl: cp.certificateUrl
+                     }
+                 }
+            });
+
+        res.status(200).json({
+            success: true,
+            message: 'My courses fetched successfully',
+            courses: myCourses
+        });
+    } catch (e) {
+        return next(new AppError(e.message, 500));
+    }
+}
+
 export {
     register,
     login,
@@ -331,5 +500,9 @@ export {
     forgotPassword,
     resetPassword,
     changePassword,
-    updateUser
+    updateUser,
+    updateUserProgress,
+    getCourseProgress,
+    generateCertificate,
+    getMyCourses
 }

@@ -20,6 +20,7 @@ export const getRazorPayApiKey = async (req, res, next) => {
 export const buySubscription = async (req, res, next) => {
     try {
         const { id } = req.user;
+        const { courseId, coursePrice } = req.body;
         const user = await userModel.findById(id);
 
         if (!user) {
@@ -31,13 +32,14 @@ export const buySubscription = async (req, res, next) => {
         }
 
         const order = await razorpay.orders.create({
-            amount: 49900, // amount in smallest currency unit (e.g., 100 paise = 1 INR)
+            amount: coursePrice * 100, // amount in smallest currency unit (e.g., 100 paise = 1 INR)
             currency: "INR",
             receipt: `receipt_${user._id}`,
         });
 
         user.subscription.id = order.id;
         user.subscription.status = order.status;
+        user.subscription.courseId = courseId; // Store courseId with subscription
 
         await user.save();
 

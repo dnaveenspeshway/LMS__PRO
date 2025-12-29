@@ -67,14 +67,14 @@ export default function Profile() {
 
   useEffect(() => {
     setIschanged(userInput.name !== userData?.fullName || userInput.avatar);
-  }, [userInput]);
+  }, [userInput, userData]);
 
   useEffect(() => {
     async function fetchUser() {
       await dispatch(getUserData());
     }
     if (Object.keys(userData).length < 1) fetchUser();
-  }, []);
+  }, [dispatch, userData]);
 
   useEffect(() => {
     setUserInput({
@@ -82,7 +82,7 @@ export default function Profile() {
       name: userData?.fullName,
       userId: userData?._id,
     });
-  }, []);
+  }, [userData, userInput]);
 
   return (
     <Layout hideFooter={true}>

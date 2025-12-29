@@ -60,7 +60,7 @@ export default function Signup() {
       return;
     }
     // checking valid email
-    if (!signupData.email.match(/^[\w-\.]+@([\w-]+\.)+[\w-]{2,4}$/g)) {
+    if (!signupData.email.match(/^[\w-.]+@([\w-]+\.)+[\w-]{2,4}$/g)) {
       toast.error("Invalid email id");
       return;
     }

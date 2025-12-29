@@ -11,66 +11,41 @@ const initialState = {
 // .....signup.........
 export const createAccount = createAsyncThunk("/auth/signup", async (data) => {
     const loadingMessage = toast.loading("Please wait! creating your account...");
-    try {
-        const res = await axiosInstance.post("/user/register", data);
-        toast.success(res?.data?.message, { id: loadingMessage });
-        return res?.data
-    } catch (error) {
-        toast.error(error?.response?.data?.message, { id: loadingMessage });
-        throw error;
-    }
+    const res = await axiosInstance.post("/user/register", data);
+    toast.success(res?.data?.message, { id: loadingMessage });
+    return res?.data
 })
 
 // .....Login.........
 export const login = createAsyncThunk("/auth/login", async (data) => {
     const loadingMessage = toast.loading("Please wait! logging into your account...");
-    try {
-        const res = await axiosInstance.post("/user/login", data);
-        toast.success(res?.data?.message, { id: loadingMessage });
-        return res?.data
-    } catch (error) {
-        toast.error(error?.response?.data?.message, { id: loadingMessage });
-        throw error;
-    }
+    const res = await axiosInstance.post("/user/login", data);
+    toast.success(res?.data?.message, { id: loadingMessage });
+    return res?.data
 })
 
 // .....Logout.........
 export const logout = createAsyncThunk("/auth/logout", async () => {
     const loadingMessage = toast.loading("logout...");
-    try {
-        const res = await axiosInstance.get("/user/logout");
-        toast.success(res?.data?.message, { id: loadingMessage });
-        return res?.data
-    } catch (error) {
-        toast.error(error?.response?.data?.message, { id: loadingMessage });
-        throw error;
-    }
+    const res = await axiosInstance.get("/user/logout");
+    toast.success(res?.data?.message, { id: loadingMessage });
+    return res?.data
 })
 
 // .....get user data.........
 export const getUserData = createAsyncThunk("/auth/user/me", async () => {
     const loadingMessage = toast.loading("fetching profile...");
-    try {
-        const res = await axiosInstance.get("/user/me");
-        toast.success(res?.data?.message, { id: loadingMessage });
-        return res?.data
-    } catch (error) {
-        toast.error(error?.response?.data?.message, { id: loadingMessage });
-        throw error;
-    }
+    const res = await axiosInstance.get("/user/me");
+    toast.success(res?.data?.message, { id: loadingMessage });
+    return res?.data
 })
 
 // .....update user data.........
 export const updateUserData = createAsyncThunk("/auth/user/me", async (data) => {
     const loadingMessage = toast.loading("Updating changes...");
-    try {
-        const res = await axiosInstance.post(`/user/update/${data.id}`, data.formData);
-        toast.success(res?.data?.message, { id: loadingMessage });
-        return res?.data
-    } catch (error) {
-        toast.error(error?.response?.data?.message, { id: loadingMessage });
-        throw error;
-    }
+    const res = await axiosInstance.post(`/user/update/${data.id}`, data.formData);
+    toast.success(res?.data?.message, { id: loadingMessage });
+    return res?.data
 })
 
 // .....change user password.......
@@ -78,14 +53,9 @@ export const changePassword = createAsyncThunk(
     "/auth/user/changePassword",
     async (userPassword) => {
         const loadingMessage = toast.loading("Changing password...");
-        try {
-            const res = await axiosInstance.post("/user/change-password", userPassword);
-            toast.success(res?.data?.message, { id: loadingMessage });
-            return res?.data
-        } catch (error) {
-            toast.error(error?.response?.data?.message, { id: loadingMessage });
-            throw error;
-        }
+        const res = await axiosInstance.post("/user/change-password", userPassword);
+        toast.success(res?.data?.message, { id: loadingMessage });
+        return res?.data
     }
 );
 
@@ -94,14 +64,9 @@ export const forgetPassword = createAsyncThunk(
     "auth/user/forgetPassword",
     async (email) => {
         const loadingMessage = toast.loading("Please Wait! sending email...");
-        try {
-            const res = await axiosInstance.post("/user/reset", {email});
-            toast.success(res?.data?.message, { id: loadingMessage });
-            return res?.data
-        } catch (error) {
-            toast.error(error?.response?.data?.message, { id: loadingMessage });
-            throw error;
-        }
+        const res = await axiosInstance.post("/user/reset", {email});
+        toast.success(res?.data?.message, { id: loadingMessage });
+        return res?.data
     }
 );
 
@@ -109,16 +74,21 @@ export const forgetPassword = createAsyncThunk(
 // .......reset the user password......
 export const resetPassword = createAsyncThunk("/user/reset", async (data) => {
     const loadingMessage = toast.loading("Please Wait! reseting your password...");
-    try {
-        const res = await axiosInstance.post(`/user/reset/${data.resetToken}`,
-            { password: data.password }
-        );
-        toast.success(res?.data?.message, { id: loadingMessage });
-        return res?.data
-    } catch (error) {
-        toast.error(error?.response?.data?.message, { id: loadingMessage });
-        throw error;
-    }
+    const res = await axiosInstance.post(`/user/reset/${data.resetToken}`,
+        { password: data.password }
+    );
+    toast.success(res?.data?.message, { id: loadingMessage });
+    return res?.data
+});
+
+export const getUserProgress = createAsyncThunk("/auth/user/progress", async (courseId) => {
+    const res = await axiosInstance.get(`/user/progress?courseId=${courseId}`);
+    return res?.data;
+});
+
+export const updateProgress = createAsyncThunk("/auth/user/updateProgress", async (data) => {
+    const res = await axiosInstance.post(`/user/progress`, data);
+    return res?.data;
 });
 
 const authSlice = createSlice({
@@ -165,8 +135,11 @@ const authSlice = createSlice({
             state.role = action?.payload?.user?.role;
             state.isLoggedIn = true;
         })
+        builder.addCase(updateProgress.rejected, (state, action) => {
+            toast.error(action.error.message);
+        })
     }
 })
 
-export const { } = authSlice.actions;
+
 export default authSlice.reducer;

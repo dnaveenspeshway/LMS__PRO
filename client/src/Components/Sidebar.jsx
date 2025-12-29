@@ -4,14 +4,7 @@ import { logout } from "../Redux/Slices/AuthSlice";
 import { Link, useNavigate } from "react-router-dom";
 import { AiFillCloseCircle } from "react-icons/ai";
 import { FiMenu } from "react-icons/fi";
-import {
-  FaHome,
-  FaUserCircle,
-  FaPlus,
-  FaList,
-  FaInfoCircle,
-  FaPhone,
-} from "react-icons/fa";
+import { FaBook, FaList, FaPlus, FaUserCircle } from "react-icons/fa";
 
 export default function Sidebar({ hideBar = false }) {
   const navigate = useNavigate();
@@ -78,6 +71,18 @@ export default function Sidebar({ hideBar = false }) {
                 All Courses
               </Link>
             </li>
+
+            {isLoggedIn && role === "USER" && (
+              <li>
+                <Link to="/user/my-courses" className="flex gap-4 items-center">
+                  <FaBook
+                    size={18}
+                    className="text-gray-500 dark:text-slate-100"
+                  />
+                  My Courses
+                </Link>
+              </li>
+            )}
 
             {isLoggedIn ? (
               null
