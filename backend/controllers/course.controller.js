@@ -84,7 +84,7 @@ const getLecturesByCourseId = async (req, res, next) => {
         if (req.user.role !== 'ADMIN') {
             const user = await userModel.findById(req.user.id);
             const isEnrolled = user.courseProgress.some(
-                (cp) => cp.courseId.toString() === id
+                (cp) => cp.courseId && cp.courseId.toString() === id
             );
 
             if (!isEnrolled) {

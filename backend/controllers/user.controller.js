@@ -441,7 +441,7 @@ const getCourseProgress = async (req, res, next) => {
         }
 
         const courseProgress = user.courseProgress.find(
-            (progress) => progress.courseId.toString() === courseId
+            (progress) => progress.courseId && progress.courseId.toString() === courseId
         );
 
         if (!courseProgress) {
