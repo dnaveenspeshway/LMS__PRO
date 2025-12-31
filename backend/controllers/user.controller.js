@@ -432,7 +432,7 @@ const updateUserProgress = async (req, res, next) => {
 
 const getCourseProgress = async (req, res, next) => {
     try {
-        const { courseId } = req.params;
+        const { courseId } = req.query;
         const { id } = req.user;
 
         const user = await userModel.findById(id);

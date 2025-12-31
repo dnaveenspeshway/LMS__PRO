@@ -34,6 +34,33 @@ export default function DisplayLecture() {
   const isCourseCompleted = totalLectures > 0 && completedLectures >= totalLectures;
   const progressPercentage = totalLectures > 0 ? Math.round((completedLectures / totalLectures) * 100) : 0;
 
+  const handleCertificateDownload = async () => {
+    try {
+      const response = await axiosInstance.get(`/user/certificate/${state._id}`, {
+        responseType: 'blob',
+      });
+      const url = window.URL.createObjectURL(new Blob([response.data]));
+      const link = document.createElement('a');
+      link.href = url;
+      link.setAttribute('download', `certificate-${state.title}.pdf`);
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+    } catch (error) {
+      toast.error("Failed to download certificate");
+    }
+  };
+
+  const handleVideoEnded = async () => {
+    const lectureId = lectures[currentVideo]._id;
+    if (!userProgress.lecturesCompleted.includes(lectureId)) {
+      const res = await dispatch(updateProgress({ courseId: state._id, lectureId }));
+      if (res?.payload?.success) {
+        setUserProgress(res.payload.courseProgress);
+      }
+    }
+  };
+
   async function onLectureDelete(courseId, lectureId) {
     await dispatch(
       deleteCourseLecture({ courseId: courseId, lectureId: lectureId })
@@ -50,7 +77,7 @@ export default function DisplayLecture() {
       await dispatch(getCourseLectures(state._id));
       const progressRes = await dispatch(getUserProgress(state._id));
       if (progressRes?.payload?.success) {
-        setUserProgress(progressRes.payload.progress);
+        setUserProgress(progressRes.payload.courseProgress || { lecturesCompleted: [] });
       }
     })();
   }, [state, dispatch, navigate]); // Add dependencies
@@ -91,6 +118,7 @@ export default function DisplayLecture() {
                       controls
                       controlsList="nodownload"
                       className="h-full mx-auto"
+                      onEnded={handleVideoEnded}
                     ></video>
                   )
                 )}
