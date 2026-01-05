@@ -484,17 +484,6 @@ const getVideoDuration = async (req, res, next) => {
             let minutes = parseInt(matches[3] || '0', 10);
             let seconds = parseInt(matches[4] || '0', 10);
 
-            // Subtract 1 second to match player display (YouTube API rounds up)
-            seconds -= 1;
-            if (seconds < 0) {
-                seconds = 59;
-                minutes -= 1;
-                if (minutes < 0) {
-                    minutes = 59;
-                    hours -= 1;
-                }
-            }
-
             let formattedDuration = '';
             if (hours > 0) {
                 formattedDuration += `${hours}h `;

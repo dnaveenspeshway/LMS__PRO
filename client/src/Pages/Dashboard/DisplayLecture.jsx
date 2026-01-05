@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useNavigate, useLocation } from "react-router-dom";
 import { useDispatch, useSelector } from "react-redux";
+import YouTube from 'react-youtube';
 import {
   getCourseLectures,
   deleteCourseLecture,
@@ -106,15 +107,21 @@ export default function DisplayLecture() {
                   if (youtubeMatch) {
                     return (
                       <div className="aspect-video w-full bg-black">
-                        <iframe
-                          src={`https://www.youtube-nocookie.com/embed/${youtubeMatch[1]}?rel=0&modestbranding=1`}
-                          title="YouTube Video"
+                        <YouTube
+                          videoId={youtubeMatch[1]}
+                          onEnd={handleVideoEnded}
+                          opts={{
+                            width: '100%',
+                            height: '100%',
+                            playerVars: {
+                              rel: 0,
+                              modestbranding: 1,
+                              autoplay: 0,
+                            },
+                          }}
                           className="h-full w-full"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                          referrerPolicy="strict-origin-when-cross-origin"
-                          allowFullScreen
-                          loading="lazy"
-                        ></iframe>
+                          iframeClassName="h-full w-full"
+                        />
                       </div>
                     );
                   } else if (driveMatch) {
