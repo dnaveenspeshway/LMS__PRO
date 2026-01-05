@@ -6,6 +6,8 @@ import Layout from '../../Layout/Layout';
 import { AiOutlineArrowLeft } from 'react-icons/ai';
 import toast from 'react-hot-toast';
 
+import api from '../../Helpers/api';
+
 export default function AssignmentPage() {
     const { state } = useLocation();
     const navigate = useNavigate();
@@ -14,6 +16,7 @@ export default function AssignmentPage() {
     const [score, setScore] = useState(0);
     const [showScore, setShowScore] = useState(false);
     const [selectedOption, setSelectedOption] = useState('');
+    const [userAnswers, setUserAnswers] = useState([]);
 
     const handleOptionSelect = (option) => {
         setSelectedOption(option);
@@ -26,6 +29,9 @@ export default function AssignmentPage() {
             toast.error("Please select an option");
             return;
         }
+
+        const newUserAnswers = [...userAnswers, selectedOption];
+        setUserAnswers(newUserAnswers);
 
         let newScore = score;
         if (selectedOption === quizzes[currentQuestion].correctAnswer) {
@@ -52,7 +58,26 @@ export default function AssignmentPage() {
         setScore(0);
         setShowScore(false);
         setSelectedOption('');
+        setUserAnswers([]);
     };
+
+    const percentage = quizzes.length > 0 ? (score / quizzes.length) * 100 : 0;
+    const isPassed = percentage >= 65;
+
+    const downloadCertificate = async () => {
+        try {
+            const response = await api.generateCertificate(state._id);
+            const url = window.URL.createObjectURL(new Blob([response.data]));
+            const link = document.createElement('a');
+            link.href = url;
+            link.setAttribute('download', `Certificate-${state.title}.pdf`);
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+        } catch (error) {
+            toast.error("Failed to download certificate");
+        }
+    }
 
     return (
         <Layout>
@@ -62,16 +87,40 @@ export default function AssignmentPage() {
                 </button>
                 <div className="md:w-[600px] w-full bg-white dark:bg-base-100 shadow-xl rounded-lg p-8">
                     {showScore ? (
-                        <div className="text-center space-y-5">
-                            <h2 className="text-3xl font-bold text-accent">Assignment Completed!</h2>
-                            <p className="text-xl">
-                                You scored <span className="font-bold text-success">{score}</span> out of <span className="font-bold text-primary">{quizzes.length}</span>
-                            </p>
-                            <div className="text-6xl my-5">
-                                {score === quizzes.length ? '🏆' : score > quizzes.length / 2 ? '👍' : '📚'}
+                        <div className="space-y-8">
+                            <div className="text-center space-y-4">
+                                {isPassed ? (
+                                    <>
+                                        <h2 className="text-4xl font-black text-success uppercase tracking-widest">Congratulations!</h2>
+                                        <p className="text-2xl font-bold text-gray-700 dark:text-gray-300">
+                                            You have successfully completed the course!
+                                        </p>
+                                    </>
+                                ) : (
+                                    <>
+                                        <h2 className="text-4xl font-black text-error uppercase tracking-widest">Keep Learning!</h2>
+                                        <p className="text-2xl font-bold text-gray-700 dark:text-gray-300">
+                                            You need at least 65% to pass and earn your certificate.
+                                        </p>
+                                    </>
+                                )}
+                                <p className="text-xl">
+                                    Final Score: <span className={`font-black text-3xl ${isPassed ? 'text-success' : 'text-error'}`}>{percentage.toFixed(0)}%</span>
+                                    <span className="ml-2 text-gray-500">({score}/{quizzes.length})</span>
+                                </p>
+
+                                <div className="flex flex-col gap-4 pt-4 items-center">
+                                    {!isPassed && (
+                                        <button onClick={handleRetake} className="btn btn-primary w-full h-14 text-lg">Retake Assignment</button>
+                                    )}
+                                    {isPassed && (
+                                        <button onClick={downloadCertificate} className="btn bg-yellow-500 hover:bg-yellow-600 text-white border-none w-full h-14 text-lg animate-bounce">
+                                            Download Certificate 📜
+                                        </button>
+                                    )}
+                                    <button onClick={() => navigate(-1)} className="btn btn-outline w-full h-14 text-lg">Back to Course</button>
+                                </div>
                             </div>
-                            <button onClick={handleRetake} className="btn btn-primary btn-outline mr-4">Retake Assignment</button>
-                            <button onClick={() => navigate(-1)} className="btn btn-secondary">Back to Course</button>
                         </div>
                     ) : (
                         quizzes.length > 0 ? (

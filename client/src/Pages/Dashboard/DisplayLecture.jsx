@@ -235,14 +235,28 @@ export default function DisplayLecture() {
               </ul>
 
               {completedLectures >= totalLectures && state?.quizzes?.length > 0 && (
-                <div className="mt-5 w-full flex flex-col gap-4 items-center">
+                <div className="mt-8 w-full flex flex-col gap-5 items-center p-6 border-t dark:border-gray-800 bg-gray-50/50 dark:bg-slate-900/50 rounded-xl">
                   {userProgress?.quizScores?.some(q => q.quizId === 'final-assignment') ? (
-                    <span className="text-xl font-bold text-green-600">
-                      Final Assignment Score: {userProgress.quizScores.find(q => q.quizId === 'final-assignment').score}/{state.quizzes.length}
-                    </span>
+                    <div className="flex flex-col items-center gap-4">
+                      <div className="text-center">
+                        <p className="text-gray-500 font-bold uppercase text-xs tracking-widest mb-1">Your Performance</p>
+                        <h2 className="text-2xl font-black text-green-600 font-inter">
+                          Final Assignment Score: {userProgress.quizScores.find(q => q.quizId === 'final-assignment').score}/{state.quizzes.length}
+                          <span className="ml-3 text-lg opacity-80">
+                            ({Math.round((userProgress.quizScores.find(q => q.quizId === 'final-assignment').score / state.quizzes.length) * 100)}%)
+                          </span>
+                        </h2>
+                      </div>
+                      <button
+                        className="btn btn-primary h-12 px-8 text-white font-black uppercase tracking-tighter"
+                        onClick={() => navigate("/course/assignment", { state: { ...state, quizzes: state.quizzes, isFinalAssignment: true } })}
+                      >
+                        Retake Assignment
+                      </button>
+                    </div>
                   ) : (
                     <button
-                      className="btn btn-warning btn-lg text-white font-bold"
+                      className="btn bg-yellow-500 hover:bg-yellow-600 text-white font-black h-14 px-12 text-lg uppercase tracking-widest"
                       onClick={() => navigate("/course/assignment", { state: { ...state, quizzes: state.quizzes, isFinalAssignment: true } })}
                     >
                       Take Final Assignment

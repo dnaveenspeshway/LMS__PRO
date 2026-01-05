@@ -553,7 +553,7 @@ const updateQuizScore = async (req, res, next) => {
                     percentage = (score / totalAssignments) * 100;
                 }
 
-                if (percentage >= 67) {
+                if (percentage >= 65) {
                     courseProgress.isCompleted = true;
                 } else {
                     courseProgress.isCompleted = false;
