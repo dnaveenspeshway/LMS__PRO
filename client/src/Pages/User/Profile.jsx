@@ -18,11 +18,12 @@ export default function Profile() {
     name: userData?.fullName || "",
     avatar: null,
     previewImage: null,
-    userId: null,
+    userId: userData?._id || null,
   });
   const avatarInputRef = useRef(null);
-  const [isChanged, setIschanged] = useState(false);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
+
+  const isChanged = userInput.name !== userData?.fullName || !!userInput.avatar;
 
   function handleImageUpload(e) {
     e.preventDefault();
@@ -53,7 +54,11 @@ export default function Profile() {
     const response = await dispatch(updateUserData(data));
     if (response?.payload?.success) {
       await dispatch(getUserData());
-      setIschanged(false);
+      setUserInput((prev) => ({
+        ...prev,
+        avatar: null,
+        previewImage: null,
+      }));
     }
     setIsUpdating(false);
   }
@@ -66,23 +71,20 @@ export default function Profile() {
   }
 
   useEffect(() => {
-    setIschanged(userInput.name !== userData?.fullName || userInput.avatar);
-  }, [userInput, userData]);
-
-  useEffect(() => {
-    async function fetchUser() {
-      await dispatch(getUserData());
+    if (!userData || Object.keys(userData).length < 1) {
+      dispatch(getUserData());
     }
-    if (Object.keys(userData).length < 1) fetchUser();
   }, [dispatch, userData]);
 
   useEffect(() => {
-    setUserInput({
-      ...userInput,
-      name: userData?.fullName,
-      userId: userData?._id,
-    });
-  }, [userData, userInput]);
+    if (userData && Object.keys(userData).length > 0) {
+      setUserInput((prev) => ({
+        ...prev,
+        name: userData?.fullName || "",
+        userId: userData?._id || null,
+      }));
+    }
+  }, [userData]);
 
   return (
     <Layout hideFooter={true}>
