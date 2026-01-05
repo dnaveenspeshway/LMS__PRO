@@ -107,10 +107,11 @@ export default function DisplayLecture() {
                     return (
                       <div className="aspect-video w-full bg-black">
                         <iframe
-                          src={`https://www.youtube.com/embed/${youtubeMatch[1]}?rel=0&modestbranding=1`}
+                          src={`https://www.youtube-nocookie.com/embed/${youtubeMatch[1]}?rel=0&modestbranding=1`}
                           title="YouTube Video"
                           className="h-full w-full"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                          referrerPolicy="strict-origin-when-cross-origin"
                           allowFullScreen
                           loading="lazy"
                         ></iframe>
@@ -124,10 +125,10 @@ export default function DisplayLecture() {
                             src={`https://drive.google.com/file/d/${driveMatch[1]}/preview`}
                             title="Google Drive Video"
                             className="h-full w-full border-none"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
                             allowFullScreen
                             loading="lazy"
-                            referrerPolicy="no-referrer-when-downgrade"
+                            referrerPolicy="strict-origin-when-cross-origin"
                           ></iframe>
                         </div>
                         <p className="text-[10px] text-gray-400 mt-1 px-2 italic">
