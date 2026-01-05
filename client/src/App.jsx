@@ -13,7 +13,7 @@ import AddLecture from "./Pages/Dashboard/AddLecture";
 import AddQuiz from "./Pages/Dashboard/AddQuiz";
 import AddAssignment from "./Pages/Dashboard/AddAssignment";
 import AdminDashboard from "./Pages/Dashboard/AdminDashboard";
-import EnrolledStudents from './pages/dashboard/EnrolledStudents';
+import EnrolledStudents from "./Pages/Dashboard/EnrolledStudents";
 import DisplayLecture from "./Pages/Dashboard/DisplayLecture";
 import Denied from "./Pages/Denied";
 import HomePage from "./Pages/HomePage";
