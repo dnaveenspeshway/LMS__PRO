@@ -482,6 +482,7 @@ const getVideoDuration = async (req, res, next) => {
                 keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS, // Path to your service account key file
                 scopes: ['https://www.googleapis.com/auth/drive.readonly'],
             });
+            
             const authClient = await auth.getClient();
             google.options({ auth: authClient });
             const drive = google.drive({ version: 'v3' });
