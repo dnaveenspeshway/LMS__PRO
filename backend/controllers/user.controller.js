@@ -415,7 +415,7 @@ const updateUserProgress = async (req, res, next) => {
         }
 
         if (course.lectures.length > 0 && courseProgress.lecturesCompleted.length === course.lectures.length) {
-            courseProgress.isCompleted = true;
+            // courseProgress.isCompleted = true; // Removed: Completion now depends on Final Assignment
         }
 
         await user.save();
@@ -521,11 +521,15 @@ const getMyCourses = async (req, res, next) => {
 
 const updateQuizScore = async (req, res, next) => {
     try {
-        const { courseId, lectureId, score } = req.body;
+        const { courseId, lectureId, score, isFinalAssignment } = req.body;
         const { id } = req.user;
 
-        if (!courseId || !lectureId || score === undefined) {
-            return next(new AppError("Course ID, Lecture ID and Score are required", 400));
+        if (!courseId || score === undefined) {
+            return next(new AppError("Course ID and Score are required", 400));
+        }
+
+        if (!isFinalAssignment && !lectureId) {
+            return next(new AppError("Lecture ID is required for lecture quizzes", 400));
         }
 
         const user = await userModel.findById(id);
@@ -535,14 +539,34 @@ const updateQuizScore = async (req, res, next) => {
         );
 
         if (courseProgress) {
-            const existingQuizScore = courseProgress.quizScores.find(q => q.quizId === lectureId);
-            if (existingQuizScore) {
-                existingQuizScore.score = score;
+            if (isFinalAssignment) {
+                // Determine if passed? For now just completing it marks as done.
+                // You might want to add a passing score check here.
+                // Assuming any completion allows certificate:
+                courseProgress.isCompleted = true;
+
+                // Track assignment score separately or with a special ID?
+                // Using 'final-assignment' as ID
+                const existingQuizScore = courseProgress.quizScores.find(q => q.quizId === 'final-assignment');
+                if (existingQuizScore) {
+                    existingQuizScore.score = score;
+                } else {
+                    courseProgress.quizScores.push({
+                        quizId: 'final-assignment',
+                        score: score
+                    });
+                }
+
             } else {
-                courseProgress.quizScores.push({
-                    quizId: lectureId,
-                    score: score
-                });
+                const existingQuizScore = courseProgress.quizScores.find(q => q.quizId === lectureId);
+                if (existingQuizScore) {
+                    existingQuizScore.score = score;
+                } else {
+                    courseProgress.quizScores.push({
+                        quizId: lectureId,
+                        score: score
+                    });
+                }
             }
             await user.save();
         }

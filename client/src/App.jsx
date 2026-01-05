@@ -8,8 +8,10 @@ import CreateCourse from "./Pages/Course/CreateCourse";
 import CourseDescription from "./Pages/Course/CourseDescription";
 import CourseList from "./Pages/Course/CourseList";
 import QuizPage from "./Pages/Course/QuizPage";
+import AssignmentPage from "./Pages/Course/AssignmentPage";
 import AddLecture from "./Pages/Dashboard/AddLecture";
 import AddQuiz from "./Pages/Dashboard/AddQuiz";
+import AddAssignment from "./Pages/Dashboard/AddAssignment";
 import AdminDashboard from "./Pages/Dashboard/AdminDashboard";
 import EnrolledStudents from './pages/dashboard/EnrolledStudents';
 import DisplayLecture from "./Pages/Dashboard/DisplayLecture";
@@ -54,6 +56,7 @@ function App() {
           <Route path="/course/create" element={<CreateCourse />} />
           <Route path="/course/addlecture" element={<AddLecture />} />
           <Route path="/course/addquiz" element={<AddQuiz />} />
+          <Route path="/course/addassignment" element={<AddAssignment />} />
           <Route path="/admin/dashboard" element={<AdminDashboard />} />
           <Route path="/course/students" element={<EnrolledStudents />} />
         </Route>
@@ -66,6 +69,7 @@ function App() {
           <Route path="/checkout/fail" element={<CheckoutFail />} />
           <Route path="/course/displaylectures" element={<DisplayLecture />} />
           <Route path="/course/quiz" element={<QuizPage />} />
+          <Route path="/course/assignment" element={<AssignmentPage />} />
           <Route path="/user/my-courses" element={<MyCourses />} />
         </Route>
 

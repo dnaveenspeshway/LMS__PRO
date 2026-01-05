@@ -156,11 +156,11 @@ export default function DisplayLecture() {
                         </button>
                         <button
                           onClick={() =>
-                            navigate("/course/addquiz", { state: { ...state } })
+                            navigate("/course/addassignment", { state: { ...state } })
                           }
                           className="btn-primary px-3 py-2 font-inter rounded-md font-semibold text-sm bg-purple-500 hover:bg-purple-600"
                         >
-                          Add Quiz
+                          Add Assignment
                         </button>
                       </div>
                     )}
@@ -236,7 +236,24 @@ export default function DisplayLecture() {
                   })}
               </ul>
 
-              {isCourseCompleted && (
+              {completedLectures >= totalLectures && state?.quizzes?.length > 0 && (
+                <div className="mt-5 w-full flex flex-col gap-4 items-center">
+                  {userProgress?.quizScores?.some(q => q.quizId === 'final-assignment') ? (
+                    <span className="text-xl font-bold text-green-600">
+                      Final Assignment Score: {userProgress.quizScores.find(q => q.quizId === 'final-assignment').score}/{state.quizzes.length}
+                    </span>
+                  ) : (
+                    <button
+                      className="btn btn-warning btn-lg text-white font-bold"
+                      onClick={() => navigate("/course/assignment", { state: { ...state, quizzes: state.quizzes, isFinalAssignment: true } })}
+                    >
+                      Take Final Assignment
+                    </button>
+                  )}
+                </div>
+              )}
+
+              {userProgress?.isCompleted && (
                 <div className="mt-5 w-full flex justify-center">
                   <button
                     className="btn btn-success btn-lg text-white font-bold animate-pulse"
