@@ -9,22 +9,24 @@ import { google } from 'googleapis';
 
 // Helper function to convert ISO 8601 duration to a readable format
 const convertIsoToDuration = (isoDuration) => {
-    const regex = /PT(?:(\d+)H)?(?:(\d+)M)?(?:(\d+)S)?/;
+    // Correctly matches ISO 8601 duration format including days, hours, minutes, and seconds (with potential decimals)
+    const regex = /P(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?/;
     const matches = isoDuration.match(regex);
 
     if (!matches) {
         return '';
     }
 
-    const hours = parseInt(matches[1] || '0', 10);
-    const minutes = parseInt(matches[2] || '0', 10);
-    const seconds = parseInt(matches[3] || '0', 10);
+    const days = parseInt(matches[1] || '0', 10);
+    const hours = parseInt(matches[2] || '0', 10) + (days * 24);
+    const minutes = parseInt(matches[3] || '0', 10);
+    const seconds = Math.floor(parseFloat(matches[4] || '0'));
 
     let formattedDuration = '';
     if (hours > 0) {
         formattedDuration += `${hours}h `;
     }
-    if (minutes > 0 || hours > 0) { // Show minutes if there are hours or minutes
+    if (minutes > 0 || hours > 0) {
         formattedDuration += `${minutes}m `;
     }
     formattedDuration += `${seconds}s`;
@@ -467,7 +469,41 @@ const getVideoDuration = async (req, res, next) => {
             }
 
             const isoDuration = items[0].contentDetails.duration;
-            const formattedDuration = convertIsoToDuration(isoDuration);
+
+            // YouTube API rounds duration up, but player shows floored value
+            // Parse the ISO duration and subtract 1 second to match player display
+            const regex = /P(?:(\d+)D)?T(?:(\d+)H)?(?:(\d+)M)?(?:(\d+(?:\.\d+)?)S)?/;
+            const matches = isoDuration.match(regex);
+
+            if (!matches) {
+                return next(new AppError('Invalid duration format from YouTube API', 500));
+            }
+
+            const days = parseInt(matches[1] || '0', 10);
+            let hours = parseInt(matches[2] || '0', 10) + (days * 24);
+            let minutes = parseInt(matches[3] || '0', 10);
+            let seconds = parseInt(matches[4] || '0', 10);
+
+            // Subtract 1 second to match player display (YouTube API rounds up)
+            seconds -= 1;
+            if (seconds < 0) {
+                seconds = 59;
+                minutes -= 1;
+                if (minutes < 0) {
+                    minutes = 59;
+                    hours -= 1;
+                }
+            }
+
+            let formattedDuration = '';
+            if (hours > 0) {
+                formattedDuration += `${hours}h `;
+            }
+            if (minutes > 0 || hours > 0) {
+                formattedDuration += `${minutes}m `;
+            }
+            formattedDuration += `${seconds}s`;
+            formattedDuration = formattedDuration.trim();
 
             res.status(200).json({
                 success: true,
