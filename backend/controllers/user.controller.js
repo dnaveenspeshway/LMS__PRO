@@ -540,12 +540,21 @@ const updateQuizScore = async (req, res, next) => {
 
         if (courseProgress) {
             if (isFinalAssignment) {
-                // Determine if passed? For now just completing it marks as done.
-                // You might want to add a passing score check here.
-                // Assuming any completion allows certificate:
-                courseProgress.isCompleted = true;
+                const course = await courseModel.findById(courseId);
+                if (!course) return next(new AppError("Course not found", 404));
 
-                // Track assignment score separately or with a special ID?
+                const totalAssignments = course.quizzes.length;
+                let percentage = 0;
+                if (totalAssignments > 0) {
+                    percentage = (score / totalAssignments) * 100;
+                }
+
+                if (percentage >= 67) {
+                    courseProgress.isCompleted = true;
+                } else {
+                    courseProgress.isCompleted = false;
+                }
+
                 // Using 'final-assignment' as ID
                 const existingQuizScore = courseProgress.quizScores.find(q => q.quizId === 'final-assignment');
                 if (existingQuizScore) {

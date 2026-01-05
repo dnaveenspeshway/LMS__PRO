@@ -40,6 +40,7 @@ export default function EnrolledStudents() {
                                 <th>Email</th>
                                 <th>Lectures Completed</th>
                                 <th>Progress</th>
+                                <th>Assignment Score</th>
                                 <th>Certificate</th>
                             </tr>
                         </thead>
@@ -49,6 +50,12 @@ export default function EnrolledStudents() {
                                 const completedCount = progress?.lecturesCompleted?.length || 0;
                                 const totalLectures = state?.numberOfLectures || 1;
                                 const percent = Math.round((completedCount / totalLectures) * 100);
+
+                                const finalAssignment = progress?.quizScores?.find(q => q.quizId === 'final-assignment');
+                                const assignmentScore = finalAssignment ? finalAssignment.score : 0;
+                                // Try to get total questions from state (course object)
+                                const totalAssignments = state?.quizzes?.length || 0;
+                                const assignmentPercent = totalAssignments > 0 ? Math.round((assignmentScore / totalAssignments) * 100) : 0;
 
                                 return (
                                     <tr key={student._id} className="text-black dark:text-slate-200">
@@ -65,9 +72,16 @@ export default function EnrolledStudents() {
                                             </div>
                                         </td>
                                         <td>
-                                            {progress?.isCompleted ? 
-                                                <span className="text-green-500 font-bold">Issued</span> : 
-                                                <span className="text-yellow-500">Pending</span>
+                                            {finalAssignment ? (
+                                                <span>{assignmentScore} / {totalAssignments} ({assignmentPercent}%)</span>
+                                            ) : (
+                                                <span className="text-gray-500">Not Attempted</span>
+                                            )}
+                                        </td>
+                                        <td>
+                                            {progress?.isCompleted ?
+                                                <span className="text-green-500 font-bold">Issued</span> :
+                                                <span className="text-yellow-500">In Progress</span>
                                             }
                                         </td>
                                     </tr>
@@ -75,7 +89,7 @@ export default function EnrolledStudents() {
                             })}
                             {students.length === 0 && (
                                 <tr>
-                                    <td colSpan="6" className="text-center text-2xl font-bold py-10">
+                                    <td colSpan="7" className="text-center text-2xl font-bold py-10">
                                         No students enrolled yet.
                                     </td>
                                 </tr>
