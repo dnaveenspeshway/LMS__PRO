@@ -92,42 +92,61 @@ export default function DisplayLecture() {
           <div className="flex md:flex-row flex-col md:justify-between w-full h-full">
             {/* left section for lecture video and details */}
             <div className="md:w-[48%] w-full md:p-3 p-1 overflow-y-scroll md:h-full h-[40%] flex justify-center">
-              <div className="w-full h-[170px] border bg-[#0000003d] shadow-lg">
-                {lectures && lectures?.[currentVideo]?.lecture?.secure_url && (
-                  lectures[currentVideo].lecture.secure_url.includes("youtube.com") ||
-                    lectures[currentVideo].lecture.secure_url.includes("youtu.be") ? (
-                    <iframe
-                      src={`https://www.youtube.com/embed/${lectures[currentVideo].lecture.secure_url.split("v=")[1]?.split("&")[0] ||
-                        lectures[currentVideo].lecture.secure_url.split("youtu.be/")[1]?.split("&")[0]
-                        }`}
-                      frameBorder="0"
-                      allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                      allowFullScreen
-                      className="h-full w-full"
-                    ></iframe>
-                  ) : (
-                    <video
-                      src={
-                        lectures && lectures?.[currentVideo]?.lecture?.secure_url
-                      }
-                      disablePictureInPicture
-                      disableRemotePlayback
-                      controls
-                      controlsList="nodownload"
-                      className="h-full mx-auto"
-                      onEnded={handleVideoEnded}
-                    ></video>
-                  )
-                )}
-                <div className="py-7">
+              <div className="w-full h-fit border bg-[#0000003d] shadow-lg overflow-hidden">
+                {lectures && lectures?.[currentVideo]?.lecture?.secure_url && (() => {
+                  const url = lectures[currentVideo].lecture.secure_url;
+                  const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=|embed\/|v\/|)([^\&\?\n]{11})/;
+                  const driveRegex = /(?:https?:\/\/)?drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)(?:\/view)?(?:\?usp=sharing)?/;
+
+                  const youtubeMatch = url.match(youtubeRegex);
+                  const driveMatch = url.match(driveRegex);
+
+                  if (youtubeMatch) {
+                    return (
+                      <div className="aspect-video w-full">
+                        <iframe
+                          src={`https://www.youtube.com/embed/${youtubeMatch[1]}`}
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          className="h-full w-full"
+                        ></iframe>
+                      </div>
+                    );
+                  } else if (driveMatch) {
+                    return (
+                      <div className="aspect-video w-full">
+                        <iframe
+                          src={`https://drive.google.com/file/d/${driveMatch[1]}/preview`}
+                          frameBorder="0"
+                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                          allowFullScreen
+                          className="h-full w-full"
+                        ></iframe>
+                      </div>
+                    );
+                  } else {
+                    return (
+                      <video
+                        src={url}
+                        disablePictureInPicture
+                        disableRemotePlayback
+                        controls
+                        controlsList="nodownload"
+                        className="w-full max-h-[400px] mx-auto"
+                        onEnded={handleVideoEnded}
+                      ></video>
+                    );
+                  }
+                })()}
+                <div className="p-4">
                   <h1 className="text-[17px] text-gray-700 font-[500] dark:text-white font-lato">
                     <span className="text-blue-500 dark:text-yellow-500 font-inter font-semibold text-lg">
-                      {" "}
                       Title:{" "}
                     </span>
                     {lectures && lectures?.[currentVideo]?.title}
                   </h1>
-                  <p className="text-[16.5px] pb-12 text-gray-700 font-[500] dark:text-slate-300 font-lato">
+                  <p className="text-[16.5px] pb-4 text-gray-700 font-[500] dark:text-slate-300 font-lato">
                     <span className="text-blue-500 dark:text-yellow-500 font-inter font-semibold text-lg">
                       Description:{" "}
                     </span>
