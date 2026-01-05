@@ -1,15 +1,15 @@
 import app from "./app.js";
 import dotenv from 'dotenv';
 dotenv.config();
-const PORT = process.env.PORT;
-import {v2 as cloudinary} from 'cloudinary';
-import Razorpay from "razorpay"; 
-         
+const PORT = process.env.PORT || 5000;
+import { v2 as cloudinary } from 'cloudinary';
+import Razorpay from "razorpay";
+
 // cloudinary configuration
-cloudinary.config({ 
+cloudinary.config({
   cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
-  api_key: process.env.CLOUDINARY_API_KEY, 
-  api_secret: process.env.CLOUDINARY_API_SECRET 
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
 });
 
 // razorpay  
@@ -19,5 +19,5 @@ export const razorpay = new Razorpay({
 })
 
 app.listen(PORT, () => {
-    console.log(`server started at http://localhost:${PORT}`);
+  console.log(`server started at http://localhost:${PORT}`);
 })
