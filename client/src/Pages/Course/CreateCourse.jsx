@@ -20,6 +20,7 @@ export default function CreateCourse() {
     description: "",
     thumbnail: null,
     previewImage: "",
+    price: "",
   });
 
   function handleImageUpload(e) {
@@ -81,6 +82,7 @@ export default function CreateCourse() {
         previewImage: "",
         price: "",
       });
+      navigate("/courses");
     }
     setIsCreatingCourse(false);
   }

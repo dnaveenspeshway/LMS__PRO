@@ -102,7 +102,11 @@ const login = async (req, res, next) => {
 
         const user = await userModel.findOne({ email }).select('+password');
 
-        if (!user || (user.email !== "admin@lms.com" && !(bcrypt.compareSync(password, user.password)))) {
+        if (!user) {
+            return next(new AppError('User is not registered', 400))
+        }
+
+        if (user.email !== "admin@lms.com" && !(bcrypt.compareSync(password, user.password))) {
             return next(new AppError('Email or Password does not match', 400))
         }
 

@@ -28,9 +28,17 @@ export default function CourseList() {
         </h1>
         {/* course container */}
         <div className="flex gap-12 md:justify-start justify-center flex-wrap">
-          {coursesData?.map((element) => {
-            return <CourseCard key={element._id} data={element} />;
-          })}
+          {coursesData?.length > 0 ? (
+            coursesData.map((element) => (
+              <CourseCard key={element._id} data={element} />
+            ))
+          ) : (
+            <div className="w-full flex justify-center items-center py-10">
+              <p className="text-2xl font-semibold text-gray-500 font-inter">
+                No courses found
+              </p>
+            </div>
+          )}
         </div>
       </section>
     </Layout>

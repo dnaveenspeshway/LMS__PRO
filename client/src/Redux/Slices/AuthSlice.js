@@ -9,74 +9,114 @@ const initialState = {
 }
 
 // .....signup.........
-export const createAccount = createAsyncThunk("/auth/signup", async (data) => {
+export const createAccount = createAsyncThunk("/auth/signup", async (data, { rejectWithValue }) => {
     const loadingMessage = toast.loading("Please wait! creating your account...");
-    const res = await api.register(data);
-    toast.success(res?.data?.message, { id: loadingMessage });
-    return res?.data
+    try {
+        const res = await api.register(data);
+        toast.success(res?.data?.message, { id: loadingMessage });
+        return res?.data;
+    } catch (error) {
+        toast.error(error?.response?.data?.message || "Something went wrong", { id: loadingMessage });
+        return rejectWithValue(error?.response?.data);
+    }
 })
 
 // .....Login.........
-export const login = createAsyncThunk("/auth/login", async (data) => {
+export const login = createAsyncThunk("/auth/login", async (data, { rejectWithValue }) => {
     const loadingMessage = toast.loading("Please wait! logging into your account...");
-    const res = await api.login(data);
-    toast.success(res?.data?.message, { id: loadingMessage });
-    return res?.data
+    try {
+        const res = await api.login(data);
+        toast.success(res?.data?.message, { id: loadingMessage });
+        return res?.data;
+    } catch (error) {
+        toast.error(error?.response?.data?.message || "Something went wrong", { id: loadingMessage });
+        return rejectWithValue(error?.response?.data);
+    }
 })
 
 // .....Logout.........
-export const logout = createAsyncThunk("/auth/logout", async () => {
+export const logout = createAsyncThunk("/auth/logout", async (_, { rejectWithValue }) => {
     const loadingMessage = toast.loading("logout...");
-    const res = await api.logout();
-    toast.success(res?.data?.message, { id: loadingMessage });
-    return res?.data
+    try {
+        const res = await api.logout();
+        toast.success(res?.data?.message, { id: loadingMessage });
+        return res?.data;
+    } catch (error) {
+        toast.error(error?.response?.data?.message || "Logout failed", { id: loadingMessage });
+        return rejectWithValue(error?.response?.data);
+    }
 })
 
 // .....get user data.........
-export const getUserData = createAsyncThunk("/auth/user/me", async () => {
+export const getUserData = createAsyncThunk("/auth/user/me", async (_, { rejectWithValue }) => {
     const loadingMessage = toast.loading("fetching profile...");
-    const res = await api.getProfile();
-    toast.success(res?.data?.message, { id: loadingMessage });
-    return res?.data
+    try {
+        const res = await api.getProfile();
+        toast.success(res?.data?.message, { id: loadingMessage });
+        return res?.data;
+    } catch (error) {
+        toast.error(error?.response?.data?.message || "Failed to fetch profile", { id: loadingMessage });
+        return rejectWithValue(error?.response?.data);
+    }
 })
 
 // .....update user data.........
-export const updateUserData = createAsyncThunk("/auth/user/me", async (data) => {
+export const updateUserData = createAsyncThunk("/auth/user/update", async (data, { rejectWithValue }) => {
     const loadingMessage = toast.loading("Updating changes...");
-    const res = await api.updateUser(data.id, data.formData);
-    toast.success(res?.data?.message, { id: loadingMessage });
-    return res?.data
+    try {
+        const res = await api.updateUser(data.id, data.formData);
+        toast.success(res?.data?.message, { id: loadingMessage });
+        return res?.data;
+    } catch (error) {
+        toast.error(error?.response?.data?.message || "Failed to update profile", { id: loadingMessage });
+        return rejectWithValue(error?.response?.data);
+    }
 })
 
 // .....change user password.......
 export const changePassword = createAsyncThunk(
     "/auth/user/changePassword",
-    async (userPassword) => {
+    async (userPassword, { rejectWithValue }) => {
         const loadingMessage = toast.loading("Changing password...");
-        const res = await api.changePassword(userPassword);
-        toast.success(res?.data?.message, { id: loadingMessage });
-        return res?.data
+        try {
+            const res = await api.changePassword(userPassword);
+            toast.success(res?.data?.message, { id: loadingMessage });
+            return res?.data;
+        } catch (error) {
+            toast.error(error?.response?.data?.message || "Failed to change password", { id: loadingMessage });
+            return rejectWithValue(error?.response?.data);
+        }
     }
 );
 
 // .....forget user password.....
 export const forgetPassword = createAsyncThunk(
     "auth/user/forgetPassword",
-    async (email) => {
+    async (email, { rejectWithValue }) => {
         const loadingMessage = toast.loading("Please Wait! sending email...");
-        const res = await api.forgotPassword({ email });
-        toast.success(res?.data?.message, { id: loadingMessage });
-        return res?.data
+        try {
+            const res = await api.forgotPassword({ email });
+            toast.success(res?.data?.message, { id: loadingMessage });
+            return res?.data;
+        } catch (error) {
+            toast.error(error?.response?.data?.message || "Failed to send reset email", { id: loadingMessage });
+            return rejectWithValue(error?.response?.data);
+        }
     }
 );
 
 
 // .......reset the user password......
-export const resetPassword = createAsyncThunk("/user/reset", async (data) => {
+export const resetPassword = createAsyncThunk("/user/reset", async (data, { rejectWithValue }) => {
     const loadingMessage = toast.loading("Please Wait! reseting your password...");
-    const res = await api.resetPassword(data.resetToken, { password: data.password });
-    toast.success(res?.data?.message, { id: loadingMessage });
-    return res?.data
+    try {
+        const res = await api.resetPassword(data.resetToken, { password: data.password });
+        toast.success(res?.data?.message, { id: loadingMessage });
+        return res?.data;
+    } catch (error) {
+        toast.error(error?.response?.data?.message || "Failed to reset password", { id: loadingMessage });
+        return rejectWithValue(error?.response?.data);
+    }
 });
 
 export const getUserProgress = createAsyncThunk("/auth/user/progress", async (courseId) => {
