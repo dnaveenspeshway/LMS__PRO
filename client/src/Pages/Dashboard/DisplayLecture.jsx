@@ -277,10 +277,14 @@ export default function DisplayLecture() {
                         </h2>
                       </div>
                       <button
-                        className="btn btn-primary h-12 px-8 text-white font-black uppercase tracking-tighter"
-                        onClick={() => navigate("/course/assignment", { state: { ...state, quizzes: state.quizzes, isFinalAssignment: true } })}
+                        className={`btn h-12 px-8 text-white font-black uppercase tracking-tighter transition-all duration-300 ${userProgress?.isCompleted ? 'bg-green-600 hover:bg-green-600 cursor-default' : 'btn-primary'}`}
+                        onClick={() => {
+                          if (!userProgress?.isCompleted) {
+                            navigate("/course/assignment", { state: { ...state, quizzes: state.quizzes, isFinalAssignment: true } });
+                          }
+                        }}
                       >
-                        Retake Assignment
+                        {userProgress?.isCompleted ? "QUALIFIED" : "Retake Assignment"}
                       </button>
                     </div>
                   ) : (
