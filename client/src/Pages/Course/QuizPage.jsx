@@ -15,6 +15,8 @@ export default function QuizPage() {
     const [showScore, setShowScore] = useState(false);
     const [selectedOption, setSelectedOption] = useState('');
 
+    const [userAnswers, setUserAnswers] = useState([]);
+
     const handleOptionSelect = (option) => {
         setSelectedOption(option);
     };
@@ -26,6 +28,9 @@ export default function QuizPage() {
             toast.error("Please select an option");
             return;
         }
+
+        const newUserAnswers = [...userAnswers, selectedOption];
+        setUserAnswers(newUserAnswers);
 
         let newScore = score;
         if (selectedOption === quizzes[currentQuestion].correctAnswer) {
@@ -60,6 +65,7 @@ export default function QuizPage() {
         setScore(0);
         setShowScore(false);
         setSelectedOption('');
+        setUserAnswers([]);
     };
 
     return (
@@ -68,18 +74,79 @@ export default function QuizPage() {
                 <button className="absolute top-5 left-5 text-2xl text-accent cursor-pointer" onClick={() => navigate(-1)}>
                     <AiOutlineArrowLeft />
                 </button>
-                <div className="md:w-[600px] w-full bg-white dark:bg-base-100 shadow-xl rounded-lg p-8">
+                <div className={`${showScore ? 'md:w-[800px]' : 'md:w-[600px]'} w-full bg-white dark:bg-base-100 shadow-xl rounded-lg p-8`}>
                     {showScore ? (
-                        <div className="text-center space-y-5">
-                            <h2 className="text-3xl font-bold text-accent">Quiz Completed!</h2>
-                            <p className="text-xl">
-                                You scored <span className="font-bold text-success">{score}</span> out of <span className="font-bold text-primary">{quizzes.length}</span>
-                            </p>
-                            <div className="text-6xl my-5">
-                                {score === quizzes.length ? '🏆' : score > quizzes.length / 2 ? '👍' : '📚'}
+                        <div className="space-y-8">
+                            <div className="text-center space-y-3">
+                                <h2 className="text-3xl font-bold text-accent font-inter">Quiz Completed!</h2>
+                                <p className="text-xl">
+                                    You scored <span className="font-bold text-success">{score}</span> out of <span className="font-bold text-primary">{quizzes.length}</span>
+                                </p>
+                                <div className="text-5xl">
+                                    {score === quizzes.length ? '🏆' : score > quizzes.length / 2 ? '👍' : '📚'}
+                                </div>
                             </div>
-                            <button onClick={handleRetake} className="btn btn-primary btn-outline mr-4">Retake</button>
-                            <button onClick={() => navigate(-1)} className="btn btn-secondary">Back to Lectures</button>
+
+                            <div className="space-y-8">
+                                <h3 className="text-2xl font-black border-b-4 border-accent pb-2 dark:text-gray-200 uppercase tracking-tight">Review Your Results</h3>
+                                {quizzes.map((quiz, index) => {
+                                    const isUserCorrect = userAnswers[index] === quiz.correctAnswer;
+                                    return (
+                                        <div key={index} className="p-6 rounded-2xl border-2 dark:border-gray-800 bg-white dark:bg-slate-900 shadow-lg border-l-[12px] transition-all"
+                                            style={{ borderLeftColor: isUserCorrect ? '#22c55e' : '#ef4444' }}>
+                                            <div className="flex justify-between items-start gap-4 mb-6">
+                                                <h4 className="font-bold text-xl dark:text-white flex-1 leading-tight">
+                                                    <span className="text-accent font-black mr-2">Q{index + 1}:</span>
+                                                    {quiz.question}
+                                                </h4>
+                                                <span className={`px-4 py-1.5 rounded-full text-xs font-black uppercase tracking-tighter ${isUserCorrect ? 'bg-success/20 text-success border border-success/30' : 'bg-error/20 text-error border border-error/30'}`}>
+                                                    {isUserCorrect ? '✓ Correct' : '✗ Incorrect'}
+                                                </span>
+                                            </div>
+
+                                            <div className="space-y-3">
+                                                {quiz.options.map((option, optIdx) => {
+                                                    const isSelected = option === userAnswers[index];
+                                                    const isCorrect = option === quiz.correctAnswer;
+
+                                                    let borderStyles = "border-gray-100 dark:border-gray-800";
+                                                    let bgStyles = "bg-gray-50/50 dark:bg-slate-800/30";
+                                                    let badge = null;
+
+                                                    if (isCorrect) {
+                                                        borderStyles = "border-success/50 bg-success/5";
+                                                        badge = <span className="ml-auto text-[10px] font-black uppercase tracking-widest bg-success text-white px-2 py-1 rounded shadow-sm">Correct Answer</span>;
+                                                    }
+
+                                                    if (isSelected && !isCorrect) {
+                                                        borderStyles = "border-error/50 bg-error/5";
+                                                        badge = <span className="ml-auto text-[10px] font-black uppercase tracking-widest bg-error text-white px-2 py-1 rounded shadow-sm">Your Selection</span>;
+                                                    } else if (isSelected && isCorrect) {
+                                                        badge = <div className="ml-auto flex gap-2">
+                                                            <span className="text-[10px] font-black uppercase tracking-widest bg-success text-white px-2 py-1 rounded shadow-sm">Your Selection ✓</span>
+                                                        </div>;
+                                                    }
+
+                                                    return (
+                                                        <div key={optIdx} className={`flex items-center p-4 rounded-xl border-2 transition-all duration-300 ${borderStyles} ${bgStyles} ${isSelected || isCorrect ? 'scale-[1.01] shadow-sm' : 'opacity-70'}`}>
+                                                            <div className={`w-3 h-3 rounded-full mr-3 ${isCorrect ? 'bg-success' : isSelected ? 'bg-error' : 'bg-gray-300'}`}></div>
+                                                            <span className={`font-bold ${isCorrect ? 'text-success' : isSelected ? 'text-error' : 'text-gray-600 dark:text-gray-400'}`}>
+                                                                {option}
+                                                            </span>
+                                                            {badge}
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
+                                        </div>
+                                    );
+                                })}
+                            </div>
+
+                            <div className="flex justify-center gap-4 pt-6 border-t dark:border-gray-700">
+                                <button onClick={handleRetake} className="btn btn-primary btn-outline px-8">Retake</button>
+                                <button onClick={() => navigate(-1)} className="btn btn-secondary px-8">Back to Lectures</button>
+                            </div>
                         </div>
                     ) : (
                         quizzes.length > 0 ? (
