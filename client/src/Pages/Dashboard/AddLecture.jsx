@@ -55,12 +55,18 @@ export default function AddLecture() {
 
   function handleVideo(e) {
     const videoFile = e.target.files[0];
+    if (!videoFile) return;
+
+    // Revoke previous URL if any to prevent memory leaks
+    if (userInput.videoSrc) {
+      window.URL.revokeObjectURL(userInput.videoSrc);
+    }
+
     const source = window.URL.createObjectURL(videoFile);
 
     const videoElement = document.createElement('video');
     videoElement.preload = 'metadata';
     videoElement.onloadedmetadata = () => {
-      window.URL.revokeObjectURL(videoElement.src);
       const duration = videoElement.duration;
       const minutes = Math.floor(duration / 60);
       const seconds = Math.floor(duration % 60);
@@ -164,6 +170,15 @@ export default function AddLecture() {
     return () => clearTimeout(timeoutId);
 
   }, [courseDetails, navigate, userInput.videoUrl, userInput.driveUrl]);
+
+  // Cleanup effect for video blob URL
+  useEffect(() => {
+    return () => {
+      if (userInput.videoSrc) {
+        window.URL.revokeObjectURL(userInput.videoSrc);
+      }
+    };
+  }, [userInput.videoSrc]);
 
   return (
     <Layout>

@@ -449,7 +449,16 @@ const getCourseProgress = async (req, res, next) => {
         );
 
         if (!courseProgress) {
-            return next(new AppError("Course progress not found for this user", 404));
+            return res.status(200).json({
+                success: true,
+                message: "No progress found, returning default",
+                courseProgress: {
+                    courseId,
+                    lecturesCompleted: [],
+                    quizScores: [],
+                    isCompleted: false
+                }
+            });
         }
 
         res.status(200).json({

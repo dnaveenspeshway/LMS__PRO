@@ -74,6 +74,7 @@ export default function AssignmentPage() {
             document.body.appendChild(link);
             link.click();
             link.remove();
+            window.URL.revokeObjectURL(url);
         } catch (error) {
             toast.error("Failed to download certificate");
         }
