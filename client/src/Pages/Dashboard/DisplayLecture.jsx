@@ -128,19 +128,42 @@ export default function DisplayLecture() {
                     return (
                       <div className="flex flex-col w-full h-full">
                         <div className="aspect-video w-full bg-black">
-                          <iframe
-                            src={`https://drive.google.com/file/d/${driveMatch[1]}/preview`}
-                            title="Google Drive Video"
-                            className="h-full w-full border-none"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
-                            allowFullScreen
-                            loading="lazy"
-                            referrerPolicy="strict-origin-when-cross-origin"
-                          ></iframe>
+                          <video
+                            src={`https://drive.google.com/uc?id=${driveMatch[1]}&export=download`}
+                            className="h-full w-full"
+                            controls
+                            disablePictureInPicture
+                            controlsList="nodownload"
+                            onEnded={handleVideoEnded}
+                            onError={(e) => {
+                              // Fallback to iframe if direct link fails (e.g., large file)
+                              const container = e.target.parentElement;
+                              container.innerHTML = `<iframe
+                                src="https://drive.google.com/file/d/${driveMatch[1]}/preview"
+                                title="Google Drive Video"
+                                class="h-full w-full border-none"
+                                allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                                allowfullscreen
+                                loading="lazy"
+                                referrerpolicy="strict-origin-when-cross-origin"
+                              ></iframe>`;
+                              
+                              // Add the "Mark as Watched" button back since we are in an iframe now
+                              const outerContainer = container.parentElement;
+                              if (!outerContainer.querySelector('.mark-as-watched-btn')) {
+                                const btnDiv = document.createElement('div');
+                                btnDiv.className = 'flex justify-end items-center mt-2 px-2 mark-as-watched-btn';
+                                btnDiv.innerHTML = `
+                                  <button class="bg-green-500 hover:bg-green-600 text-white text-xs py-1 px-3 rounded-md transition-all duration-300 font-semibold">
+                                    Mark as Watched
+                                  </button>
+                                `;
+                                btnDiv.querySelector('button').onclick = handleVideoEnded;
+                                outerContainer.appendChild(btnDiv);
+                              }
+                            }}
+                          ></video>
                         </div>
-                        <p className="text-[10px] text-gray-400 mt-1 px-2 italic">
-                          Note: If video is unavailable, ensure "Anyone with link" is enabled in Drive sharing settings.
-                        </p>
                       </div>
                     );
                   } else {
@@ -159,11 +182,21 @@ export default function DisplayLecture() {
                 })()}
               </div>
               <div className="p-1 space-y-6">
-                <div>
-                  <h2 className="text-blue-500 dark:text-yellow-500 font-inter font-bold text-xl mb-2">Title</h2>
-                  <h1 className="text-2xl text-gray-800 dark:text-white font-[600] font-inter">
-                    {lectures && lectures?.[currentVideo]?.title}
-                  </h1>
+                <div className="flex items-center justify-between">
+                  <div>
+                    <h2 className="text-blue-500 dark:text-yellow-500 font-inter font-bold text-xl mb-2">Title</h2>
+                    <h1 className="text-2xl text-gray-800 dark:text-white font-[600] font-inter">
+                      {lectures && lectures?.[currentVideo]?.title}
+                    </h1>
+                  </div>
+                  {lectures && !userProgress?.lecturesCompleted?.includes(lectures[currentVideo]?._id) && (
+                    <button
+                      onClick={handleVideoEnded}
+                      className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded-lg font-bold text-sm transition-all duration-300 shadow-md hover:shadow-lg flex items-center gap-2"
+                    >
+                      <span>✔</span> Mark as Watched
+                    </button>
+                  )}
                 </div>
                 <div className="border-t pt-5 pb-10 dark:border-gray-700">
                   <h2 className="text-blue-500 dark:text-yellow-500 font-inter font-bold text-xl mb-2">Description</h2>
@@ -226,7 +259,9 @@ export default function DisplayLecture() {
                           <span className="font-inter">{idx + 1}. </span>
                           {lecture?.title}
                           {userProgress?.lecturesCompleted?.includes(lecture?._id) && (
-                            <span className="ml-2 text-green-500 text-xs">✔ Watched</span>
+                            <span className="ml-2 inline-flex items-center gap-1 text-green-600 dark:text-green-400 text-[11px] font-bold bg-green-50 dark:bg-green-900/20 px-2 py-0.5 rounded-full border border-green-200 dark:border-green-800/50 shadow-sm">
+                              <span className="text-sm">✔</span> Watched
+                            </span>
                           )}
                         </p>
                         {role === "ADMIN" && (
