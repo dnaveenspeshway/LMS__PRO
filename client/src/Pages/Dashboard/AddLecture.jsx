@@ -137,8 +137,8 @@ export default function AddLecture() {
       if (!urlToFetch) return;
 
       // Regex patterns (matching backend validation)
-      const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=|embed\/|v\/|)([^\&\?\n]{11})/;
-      const googleDriveRegex = /(?:https?:\/\/)?drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)(?:\/view)?(?:\?usp=sharing)?/;
+      const youtubeRegex = /^(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([^\&\?\n]{11})/;
+      const googleDriveRegex = /(?:https?:\/\/)?(?:drive\.google\.com\/(?:file\/d\/|open\?id=)|docs\.google\.com\/file\/d\/)([a-zA-Z0-9_-]+)/;
 
       if (!youtubeRegex.test(urlToFetch) && !googleDriveRegex.test(urlToFetch)) {
         // Do not fetch if URL format is invalid to avoid 400 errors

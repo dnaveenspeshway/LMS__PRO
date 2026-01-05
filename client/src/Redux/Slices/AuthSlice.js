@@ -48,15 +48,13 @@ export const logout = createAsyncThunk("/auth/logout", async (_, { rejectWithVal
 })
 
 // .....get user data.........
-export const getUserData = createAsyncThunk("/auth/user/me", async (_, { rejectWithValue }) => {
-    const loadingMessage = toast.loading("fetching profile...");
+export const getUserData = createAsyncThunk("/auth/user/me", async () => {
     try {
         const res = await api.getProfile();
-        toast.success(res?.data?.message, { id: loadingMessage });
         return res?.data;
     } catch (error) {
-        toast.error(error?.response?.data?.message || "Failed to fetch profile", { id: loadingMessage });
-        return rejectWithValue(error?.response?.data);
+        toast.error(error?.response?.data?.message || "Failed to fetch profile");
+        throw error;
     }
 })
 

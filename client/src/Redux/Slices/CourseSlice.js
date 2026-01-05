@@ -8,13 +8,11 @@ const initialState = {
 
 // ....get all courses....
 export const getAllCourses = createAsyncThunk("/courses/get", async () => {
-    const loadingMessage = toast.loading("fetching courses...");
     try {
         const res = await api.getAllCourses();
-        toast.success(res?.data?.message, { id: loadingMessage });
         return res?.data
     } catch (error) {
-        toast.error(error?.response?.data?.message, { id: loadingMessage });
+        toast.error(error?.response?.data?.message || "Failed to fetch courses");
         throw error;
     }
 })

@@ -96,34 +96,43 @@ export default function DisplayLecture() {
               <div className="w-full border bg-black shadow-lg overflow-hidden flex-shrink-0">
                 {lectures && (lectures?.[currentVideo]?.lecture?.secure_url || lectures?.[currentVideo]?.lecture) && (() => {
                   const url = lectures[currentVideo]?.lecture?.secure_url || lectures[currentVideo]?.lecture;
-                  const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=|embed\/|v\/|)([^\&\?\n]{11})/;
-                  const driveRegex = /(?:https?:\/\/)?drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)(?:\/view)?(?:\?usp=sharing)?/;
+                  // Improved Regex patterns
+                  const youtubeRegex = /^(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([^\&\?\n]{11})/;
+                  const driveRegex = /(?:https?:\/\/)?(?:drive\.google\.com\/(?:file\/d\/|open\?id=)|docs\.google\.com\/file\/d\/)([a-zA-Z0-9_-]+)/;
 
                   const youtubeMatch = typeof url === 'string' ? url.match(youtubeRegex) : null;
                   const driveMatch = typeof url === 'string' ? url.match(driveRegex) : null;
 
                   if (youtubeMatch) {
                     return (
-                      <div className="aspect-video w-full">
+                      <div className="aspect-video w-full bg-black">
                         <iframe
-                          src={`https://www.youtube.com/embed/${youtubeMatch[1]}`}
-                          frameBorder="0"
+                          src={`https://www.youtube.com/embed/${youtubeMatch[1]}?rel=0&modestbranding=1`}
+                          title="YouTube Video"
+                          className="h-full w-full"
                           allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                           allowFullScreen
-                          className="h-full w-full"
+                          loading="lazy"
                         ></iframe>
                       </div>
                     );
                   } else if (driveMatch) {
                     return (
-                      <div className="aspect-video w-full">
-                        <iframe
-                          src={`https://drive.google.com/file/d/${driveMatch[1]}/preview`}
-                          frameBorder="0"
-                          allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                          allowFullScreen
-                          className="h-full w-full"
-                        ></iframe>
+                      <div className="flex flex-col w-full h-full">
+                        <div className="aspect-video w-full bg-black">
+                          <iframe
+                            src={`https://drive.google.com/file/d/${driveMatch[1]}/preview`}
+                            title="Google Drive Video"
+                            className="h-full w-full border-none"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                            loading="lazy"
+                            referrerPolicy="no-referrer-when-downgrade"
+                          ></iframe>
+                        </div>
+                        <p className="text-[10px] text-gray-400 mt-1 px-2 italic">
+                          Note: If video is unavailable, ensure "Anyone with link" is enabled in Drive sharing settings.
+                        </p>
                       </div>
                     );
                   } else {

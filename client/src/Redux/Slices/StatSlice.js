@@ -9,13 +9,11 @@ const initialState = {
 
 // ......get stats data......
 export const getStatsData = createAsyncThunk("stats/get", async () => {
-    const loadingId = toast.loading("Getting the stats...")
     try {
         const response = await api.getAdminStats();
-        toast.success(response?.data?.message, { id: loadingId });
         return response?.data;
     } catch (error) {
-        toast.error("Failed to get stats", { id: loadingId });
+        toast.error("Failed to get stats");
         throw error
     }
 })

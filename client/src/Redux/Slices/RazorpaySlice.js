@@ -19,7 +19,7 @@ export const getRazorPayId = createAsyncThunk("/payments/keyId", async () => {
         const response = await api.getRazorPayApiKey();
         return response?.data;
     } catch (error) {
-        toast.error("Failed to load data");
+        toast.error("Failed to load Razorpay key");
         throw error
     }
 })
@@ -50,13 +50,11 @@ export const verifyUserPayment = createAsyncThunk("/payments/verify", async (dat
 
 // .....get payment record......
 export const getPaymentRecord = createAsyncThunk("/payments/record", async () => {
-    const loadingId = toast.loading("Getting the payment records");
     try {
         const response = await api.allPayments({ count: 100 });
-        toast.success(response?.data?.message, { id: loadingId });
         return response?.data;
     } catch (error) {
-        toast.error("Operation failed", { id: loadingId });
+        toast.error("Failed to fetch payment records");
         throw error;
     }
 });

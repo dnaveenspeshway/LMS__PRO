@@ -443,11 +443,11 @@ const getVideoDuration = async (req, res, next) => {
         }
 
         // Check if it's a YouTube URL
-        const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=|embed\/|v\/|)([^\&\?\n]{11})/;
+        const youtubeRegex = /^(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:youtube\.com\/(?:watch\?v=|embed\/|v\/)|youtu\.be\/)([^\&\?\n]{11})/;
         const youtubeMatch = videoUrl.match(youtubeRegex);
 
         // Check if it's a Google Drive URL
-        const googleDriveRegex = /(?:https?:\/\/)?drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)(?:\/view)?(?:\?usp=sharing)?/;
+        const googleDriveRegex = /(?:https?:\/\/)?(?:drive\.google\.com\/(?:file\/d\/|open\?id=)|docs\.google\.com\/file\/d\/)([a-zA-Z0-9_-]+)/;
         const googleDriveMatch = videoUrl.match(googleDriveRegex);
 
         if (youtubeMatch && youtubeMatch[1]) {
