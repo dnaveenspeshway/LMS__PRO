@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { toast } from "react-hot-toast";
 import { useLocation, useNavigate } from "react-router-dom";
 
-import { axiosInstance } from "../../Helpers/axiosInstance";
+import { getEnrolledStudents } from "../../Helpers/api";
 import Layout from "../../Layout/Layout";
 
 export default function EnrolledStudents() {
@@ -14,7 +14,7 @@ export default function EnrolledStudents() {
         if (!state?._id) navigate("/admin/dashboard");
         (async () => {
             try {
-                const res = await axiosInstance.get(`/courses/${state._id}/students`);
+                const res = await getEnrolledStudents(state._id);
                 if (res?.data?.success) {
                     setStudents(res.data.students);
                 }

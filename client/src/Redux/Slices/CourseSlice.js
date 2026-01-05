@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import toast from 'react-hot-toast';
-import { axiosInstance } from '../../Helpers/axiosInstance';
+import * as api from '../../Helpers/api';
 
 const initialState = {
     coursesData: []
@@ -10,7 +10,7 @@ const initialState = {
 export const getAllCourses = createAsyncThunk("/courses/get", async () => {
     const loadingMessage = toast.loading("fetching courses...");
     try {
-        const res = await axiosInstance.get("/courses");
+        const res = await api.getAllCourses();
         toast.success(res?.data?.message, { id: loadingMessage });
         return res?.data
     } catch (error) {
@@ -23,7 +23,7 @@ export const getAllCourses = createAsyncThunk("/courses/get", async () => {
 export const createNewCourse = createAsyncThunk("/courses/create", async (data) => {
     const loadingMessage = toast.loading("Creating course...");
     try {
-        const res = await axiosInstance.post("/courses", data);
+        const res = await api.createCourse(data);
         toast.success(res?.data?.message, { id: loadingMessage });
         return res?.data
     } catch (error) {
@@ -36,7 +36,7 @@ export const createNewCourse = createAsyncThunk("/courses/create", async (data) 
 export const deleteCourse = createAsyncThunk("/course/delete", async (id) => {
     const loadingId = toast.loading("deleting course ...")
     try {
-        const response = await axiosInstance.delete(`/courses/${id}`);
+        const response = await api.removeCourse(id);
         toast.success("Courses deleted successfully", { id: loadingId });
         return response?.data
     } catch (error) {

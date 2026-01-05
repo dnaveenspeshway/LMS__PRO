@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { axiosInstance } from "../../Helpers/axiosInstance";
+import * as api from "../../Helpers/api";
 import toast from "react-hot-toast";
 
 const initialState = {
@@ -11,7 +11,7 @@ const initialState = {
 export const getStatsData = createAsyncThunk("stats/get", async () => {
     const loadingId = toast.loading("Getting the stats...")
     try {
-        const response = await axiosInstance.get("/admin/stats/users");
+        const response = await api.getAdminStats();
         toast.success(response?.data?.message, { id: loadingId });
         return response?.data;
     } catch (error) {

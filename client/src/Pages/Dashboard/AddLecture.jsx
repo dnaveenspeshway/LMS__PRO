@@ -7,7 +7,7 @@ import InputBox from "../../Components/InputBox/InputBox";
 import TextArea from "../../Components/InputBox/TextArea";
 import Layout from "../../Layout/Layout";
 import { AiOutlineArrowLeft } from "react-icons/ai";
-import { axiosInstance } from "../../Helpers/axiosInstance";
+import { getVideoDuration } from "../../Helpers/api";
 
 export default function AddLecture() {
   const courseDetails = useLocation().state;
@@ -127,7 +127,7 @@ export default function AddLecture() {
 
     const fetchVideoDuration = async () => {
       const urlToFetch = userInput.driveUrl || userInput.videoUrl;
-      
+
       if (!urlToFetch) return;
 
       // Regex patterns (matching backend validation)
@@ -135,12 +135,12 @@ export default function AddLecture() {
       const googleDriveRegex = /(?:https?:\/\/)?drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)(?:\/view)?(?:\?usp=sharing)?/;
 
       if (!youtubeRegex.test(urlToFetch) && !googleDriveRegex.test(urlToFetch)) {
-          // Do not fetch if URL format is invalid to avoid 400 errors
-          return;
+        // Do not fetch if URL format is invalid to avoid 400 errors
+        return;
       }
 
       try {
-        const response = await axiosInstance.post('/courses/get-video-duration', { videoUrl: urlToFetch });
+        const response = await getVideoDuration({ videoUrl: urlToFetch });
         setUserInput((prevInput) => ({ ...prevInput, duration: response.data.duration }));
       } catch (error) {
         console.error("Error fetching video duration:", error);
@@ -150,7 +150,7 @@ export default function AddLecture() {
         // Actually, if we filter correctly, we shouldn't get 400.
         // If we get other errors (500), we should show toast.
         if (error.response && error.response.status !== 400) {
-             toast.error("Failed to fetch video duration.");
+          toast.error("Failed to fetch video duration.");
         }
         setUserInput((prevInput) => ({ ...prevInput, duration: "" }));
       }
@@ -158,7 +158,7 @@ export default function AddLecture() {
 
     // Debounce the fetch to avoid too many requests while typing
     const timeoutId = setTimeout(() => {
-        fetchVideoDuration();
+      fetchVideoDuration();
     }, 1000);
 
     return () => clearTimeout(timeoutId);

@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import toast from "react-hot-toast";
-import { axiosInstance } from '../../Helpers/axiosInstance';
+import * as api from '../../Helpers/api';
 
 const initialState = {
     isLoggedIn: localStorage.getItem("isLoggedIn") || false,
@@ -11,7 +11,7 @@ const initialState = {
 // .....signup.........
 export const createAccount = createAsyncThunk("/auth/signup", async (data) => {
     const loadingMessage = toast.loading("Please wait! creating your account...");
-    const res = await axiosInstance.post("/user/register", data);
+    const res = await api.register(data);
     toast.success(res?.data?.message, { id: loadingMessage });
     return res?.data
 })
@@ -19,7 +19,7 @@ export const createAccount = createAsyncThunk("/auth/signup", async (data) => {
 // .....Login.........
 export const login = createAsyncThunk("/auth/login", async (data) => {
     const loadingMessage = toast.loading("Please wait! logging into your account...");
-    const res = await axiosInstance.post("/user/login", data);
+    const res = await api.login(data);
     toast.success(res?.data?.message, { id: loadingMessage });
     return res?.data
 })
@@ -27,7 +27,7 @@ export const login = createAsyncThunk("/auth/login", async (data) => {
 // .....Logout.........
 export const logout = createAsyncThunk("/auth/logout", async () => {
     const loadingMessage = toast.loading("logout...");
-    const res = await axiosInstance.get("/user/logout");
+    const res = await api.logout();
     toast.success(res?.data?.message, { id: loadingMessage });
     return res?.data
 })
@@ -35,7 +35,7 @@ export const logout = createAsyncThunk("/auth/logout", async () => {
 // .....get user data.........
 export const getUserData = createAsyncThunk("/auth/user/me", async () => {
     const loadingMessage = toast.loading("fetching profile...");
-    const res = await axiosInstance.get("/user/me");
+    const res = await api.getProfile();
     toast.success(res?.data?.message, { id: loadingMessage });
     return res?.data
 })
@@ -43,7 +43,7 @@ export const getUserData = createAsyncThunk("/auth/user/me", async () => {
 // .....update user data.........
 export const updateUserData = createAsyncThunk("/auth/user/me", async (data) => {
     const loadingMessage = toast.loading("Updating changes...");
-    const res = await axiosInstance.post(`/user/update/${data.id}`, data.formData);
+    const res = await api.updateUser(data.id, data.formData);
     toast.success(res?.data?.message, { id: loadingMessage });
     return res?.data
 })
@@ -53,7 +53,7 @@ export const changePassword = createAsyncThunk(
     "/auth/user/changePassword",
     async (userPassword) => {
         const loadingMessage = toast.loading("Changing password...");
-        const res = await axiosInstance.post("/user/change-password", userPassword);
+        const res = await api.changePassword(userPassword);
         toast.success(res?.data?.message, { id: loadingMessage });
         return res?.data
     }
@@ -64,7 +64,7 @@ export const forgetPassword = createAsyncThunk(
     "auth/user/forgetPassword",
     async (email) => {
         const loadingMessage = toast.loading("Please Wait! sending email...");
-        const res = await axiosInstance.post("/user/reset", { email });
+        const res = await api.forgotPassword({ email });
         toast.success(res?.data?.message, { id: loadingMessage });
         return res?.data
     }
@@ -74,25 +74,23 @@ export const forgetPassword = createAsyncThunk(
 // .......reset the user password......
 export const resetPassword = createAsyncThunk("/user/reset", async (data) => {
     const loadingMessage = toast.loading("Please Wait! reseting your password...");
-    const res = await axiosInstance.post(`/user/reset/${data.resetToken}`,
-        { password: data.password }
-    );
+    const res = await api.resetPassword(data.resetToken, { password: data.password });
     toast.success(res?.data?.message, { id: loadingMessage });
     return res?.data
 });
 
 export const getUserProgress = createAsyncThunk("/auth/user/progress", async (courseId) => {
-    const res = await axiosInstance.get(`/user/progress?courseId=${courseId}`);
+    const res = await api.getCourseProgress(courseId);
     return res?.data;
 });
 
 export const updateProgress = createAsyncThunk("/auth/user/updateProgress", async (data) => {
-    const res = await axiosInstance.post(`/user/progress`, data);
+    const res = await api.updateUserProgress(data);
     return res?.data;
 });
 
 export const updateUserQuizScore = createAsyncThunk("/auth/user/updateQuizScore", async (data) => {
-    const res = await axiosInstance.post(`/user/progress/quiz`, data);
+    const res = await api.updateQuizScore(data);
     return res?.data;
 });
 

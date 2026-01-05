@@ -1,5 +1,5 @@
 import { createSlice, createAsyncThunk } from "@reduxjs/toolkit"
-import { axiosInstance } from '../../Helpers/axiosInstance';
+import * as api from '../../Helpers/api';
 import toast from 'react-hot-toast';
 
 const initialState = {
@@ -10,7 +10,7 @@ const initialState = {
 export const getCourseLectures = createAsyncThunk("/courses/lecture/get", async (id) => {
     const loadingId = toast.loading("Fetching Lectures...");
     try {
-        const res = await axiosInstance.get(`/courses/${id}`);
+        const res = await api.getLecturesByCourseId(id);
         toast.success("Lectures Fetching Successfully", { id: loadingId })
         return res?.data;
     } catch (error) {
@@ -23,7 +23,7 @@ export const getCourseLectures = createAsyncThunk("/courses/lecture/get", async 
 export const addCourseLecture = createAsyncThunk("/courses/lecture/add", async (data) => {
     const loadingId = toast.loading("Adding Lecture...");
     try {
-        const res = await axiosInstance.post(`/courses/${data.id}`, data.formData);
+        const res = await api.addLectureToCourseById(data.id, data.formData);
         toast.success("Lecture Added Successfully", { id: loadingId })
         return res?.data;
     } catch (error) {
@@ -37,7 +37,7 @@ export const deleteCourseLecture = createAsyncThunk("/courses/lecture/delete", a
     const loadingId = toast.loading("Deleting Lecture...");
     console.log(data);
     try {
-        const res = await axiosInstance.delete(`/courses?courseId=${data.courseId}&lectureId=${data.lectureId}`);
+        const res = await api.deleteCourseLecture({ courseId: data.courseId, lectureId: data.lectureId });
         toast.success("Lecture Deleted Successfully", { id: loadingId })
         return res?.data;
     } catch (error) {
@@ -50,7 +50,7 @@ export const deleteCourseLecture = createAsyncThunk("/courses/lecture/delete", a
 export const addLectureQuiz = createAsyncThunk("/courses/lecture/quiz/add", async (data) => {
     const loadingId = toast.loading("Adding Quiz to Lecture...");
     try {
-        const res = await axiosInstance.post(`/courses/${data.courseId}/lectures/${data.lectureId}/quiz`, data.quizData);
+        const res = await api.addQuizToLecture(data.courseId, data.lectureId, data.quizData);
         toast.success("Quiz Added Successfully", { id: loadingId })
         return res?.data;
     } catch (error) {

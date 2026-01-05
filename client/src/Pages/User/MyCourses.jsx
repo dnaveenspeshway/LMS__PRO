@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Layout from "../../Layout/Layout";
-import { axiosInstance } from "../../Helpers/axiosInstance";
+import { getMyCourses } from "../../Helpers/api";
 import { useNavigate } from "react-router-dom";
 import toast from "react-hot-toast";
 
@@ -11,7 +11,7 @@ export default function MyCourses() {
     useEffect(() => {
         (async () => {
             try {
-                const res = await axiosInstance.get("/user/my-courses");
+                const res = await getMyCourses();
                 if (res?.data?.success) {
                     setCourses(res.data.courses);
                 }
@@ -30,17 +30,17 @@ export default function MyCourses() {
 
                 <div className="flex flex-wrap gap-10 justify-center">
                     {courses.map((course) => {
-                         const progress = course.progress;
-                         const completedCount = progress?.lecturesCompleted?.length || 0;
-                         const totalLectures = course?.numberOfLectures || 1;
-                         const percent = Math.round((completedCount / totalLectures) * 100);
+                        const progress = course.progress;
+                        const completedCount = progress?.lecturesCompleted?.length || 0;
+                        const totalLectures = course?.numberOfLectures || 1;
+                        const percent = Math.round((completedCount / totalLectures) * 100);
 
                         return (
                             <div key={course._id} className="bg-base-100 w-[22rem] shadow-xl cursor-pointer group overflow-hidden rounded-lg">
                                 <div className="overflow-hidden">
-                                    <img 
-                                        src={course?.thumbnail?.secure_url} 
-                                        alt="course thumbnail" 
+                                    <img
+                                        src={course?.thumbnail?.secure_url}
+                                        alt="course thumbnail"
                                         className="h-48 w-full rounded-tr-lg rounded-tl-lg group-hover:scale=[1.2] transition-all ease-in-out duration-300"
                                     />
                                     <div className="p-3 space-y-1 text-white">
@@ -60,7 +60,7 @@ export default function MyCourses() {
                                             </div>
                                         </div>
                                         <div className="flex items-center justify-between mt-4">
-                                            <button 
+                                            <button
                                                 onClick={() => navigate("/course/displaylectures", { state: { ...course } })}
                                                 className="bg-yellow-500 px-5 py-2 rounded-md font-bold text-lg w-full hover:bg-yellow-600 transition-all ease-in-out duration-300"
                                             >

@@ -6,7 +6,7 @@ import {
   deleteCourseLecture,
 } from "../../Redux/Slices/LectureSlice";
 import { getUserProgress, updateProgress } from "../../Redux/Slices/AuthSlice";
-import { axiosInstance } from "../../Helpers/axiosInstance";
+import { generateCertificate } from "../../Helpers/api";
 import Layout from "../../Layout/Layout";
 import toast from "react-hot-toast";
 
@@ -36,9 +36,7 @@ export default function DisplayLecture() {
 
   const handleCertificateDownload = async () => {
     try {
-      const response = await axiosInstance.get(`/user/certificate/${state._id}`, {
-        responseType: 'blob',
-      });
+      const response = await generateCertificate(state._id);
       const url = window.URL.createObjectURL(new Blob([response.data]));
       const link = document.createElement('a');
       link.href = url;

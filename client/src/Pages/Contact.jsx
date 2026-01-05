@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { toast } from "react-hot-toast";
 
-import { axiosInstance } from "../Helpers/axiosInstance";
+import { contactUs } from "../Helpers/api";
 import { isEmail } from "../Helpers/regexMatcher";
 
 import InputBox from "../Components/InputBox/InputBox";
@@ -39,7 +39,7 @@ export default function Contact() {
     setIsLoading(true);
     const loadingMessage = toast.loading("sending message...");
     try {
-      const res = await axiosInstance.post("/contact", userInput);
+      const res = await contactUs(userInput);
       toast.success(res?.data?.message, { id: loadingMessage });
       setUserInput({
         name: "",

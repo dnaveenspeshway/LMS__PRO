@@ -7,7 +7,7 @@ import TextArea from "../../Components/InputBox/TextArea";
 import Layout from "../../Layout/Layout";
 import { AiOutlineArrowLeft } from "react-icons/ai";
 import { FaTrash, FaEdit } from "react-icons/fa";
-import { axiosInstance } from "../../Helpers/axiosInstance";
+import { updateQuizInCourse, addQuizToCourse, deleteQuizFromCourse } from "../../Helpers/api";
 import { getCourseLectures } from "../../Redux/Slices/LectureSlice";
 
 export default function AddAssignment() {
@@ -59,13 +59,13 @@ export default function AddAssignment() {
 
         try {
             if (isEditing) {
-                const res = await axiosInstance.put(`/courses/${courseDetails._id}/quiz/${isEditing}`, quizData);
+                const res = await updateQuizInCourse(courseDetails._id, isEditing, quizData);
                 if (res.data.success) {
                     toast.success("Assignment updated successfully");
                     setIsEditing(null);
                 }
             } else {
-                const res = await axiosInstance.post(`/courses/${courseDetails._id}/quiz`, quizData);
+                const res = await addQuizToCourse(courseDetails._id, quizData);
                 if (res.data.success) {
                     toast.success("Assignment question added successfully");
                 }
@@ -90,7 +90,7 @@ export default function AddAssignment() {
     async function handleDelete(quizId) {
         if (!window.confirm("Are you sure you want to delete this assignment question?")) return;
         try {
-            const res = await axiosInstance.delete(`/courses/${courseDetails._id}/quiz/${quizId}`);
+            const res = await deleteQuizFromCourse(courseDetails._id, quizId);
             if (res.data.success) {
                 toast.success("Assignment deleted successfully");
                 dispatch(getCourseLectures(courseDetails._id));

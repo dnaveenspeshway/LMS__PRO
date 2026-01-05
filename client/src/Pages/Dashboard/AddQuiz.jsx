@@ -8,7 +8,7 @@ import TextArea from "../../Components/InputBox/TextArea";
 import Layout from "../../Layout/Layout";
 import { AiOutlineArrowLeft } from "react-icons/ai";
 import { FaTrash, FaEdit } from "react-icons/fa";
-import { axiosInstance } from "../../Helpers/axiosInstance";
+import { updateQuizInLecture, addQuizToCourse, deleteQuizFromLecture } from "../../Helpers/api";
 
 export default function AddQuiz() {
     const courseDetails = useLocation().state;
@@ -64,7 +64,7 @@ export default function AddQuiz() {
             if (isEditing) {
                 // UPDATE QUIZ
                 try {
-                    const res = await axiosInstance.put(`/courses/${courseDetails._id}/lectures/${courseDetails.lectureId}/quiz/${isEditing}`, quizData);
+                    const res = await updateQuizInLecture(courseDetails._id, courseDetails.lectureId, isEditing, quizData);
                     if (res.data.success) {
                         toast.success("Quiz updated successfully");
                         setIsEditing(null);
@@ -99,7 +99,7 @@ export default function AddQuiz() {
         } else {
             // Fallback for legacy global quiz adding (though AddAssignment handles this now)
             try {
-                const res = await axiosInstance.post(`/courses/${courseDetails._id}/quiz`, quizData);
+                const res = await addQuizToCourse(courseDetails._id, quizData);
                 if (res.data.success) {
                     toast.success("Quiz added successfully");
                     navigate(-1);
@@ -113,7 +113,7 @@ export default function AddQuiz() {
     async function handleDelete(quizId) {
         if (!window.confirm("Are you sure you want to delete this quiz?")) return;
         try {
-            const res = await axiosInstance.delete(`/courses/${courseDetails._id}/lectures/${courseDetails.lectureId}/quiz/${quizId}`);
+            const res = await deleteQuizFromLecture(courseDetails._id, courseDetails.lectureId, quizId);
             if (res.data.success) {
                 toast.success("Quiz deleted successfully");
                 dispatch(getCourseLectures(courseDetails._id));

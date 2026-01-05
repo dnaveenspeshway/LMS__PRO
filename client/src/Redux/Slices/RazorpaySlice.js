@@ -1,6 +1,6 @@
 import { createSlice, createAsyncThunk } from '@reduxjs/toolkit';
 import toast from 'react-hot-toast';
-import { axiosInstance } from '../../Helpers/axiosInstance';
+import * as api from '../../Helpers/api';
 
 const initialState = {
     key: "",
@@ -16,7 +16,7 @@ const initialState = {
 // ....get razorpay key id.....
 export const getRazorPayId = createAsyncThunk("/payments/keyId", async () => {
     try {
-        const response = await axiosInstance.get("/payments/razorpay-key");
+        const response = await api.getRazorPayApiKey();
         return response?.data;
     } catch (error) {
         toast.error("Failed to load data");
@@ -27,7 +27,7 @@ export const getRazorPayId = createAsyncThunk("/payments/keyId", async () => {
 // ....purchase course bundle.....
 export const purchaseCourseBundle = createAsyncThunk("/payments/subscribe", async (data) => {
     try {
-        const response = await axiosInstance.post("/payments/subscribe", data);
+        const response = await api.buySubscription(data);
         return response?.data;
     } catch (error) {
         toast.error(error?.response?.data?.message);
@@ -39,7 +39,7 @@ export const purchaseCourseBundle = createAsyncThunk("/payments/subscribe", asyn
 export const verifyUserPayment = createAsyncThunk("/payments/verify", async (data) => {
     const loadingId = toast.loading("Subscribing bundle...");
     try {
-        const response = await axiosInstance.post("/payments/verify", data);
+        const response = await api.verifySubscription(data);
         toast.success("Payment verified", { id: loadingId });
         return response?.data;
     } catch (error) {
@@ -52,11 +52,11 @@ export const verifyUserPayment = createAsyncThunk("/payments/verify", async (dat
 export const getPaymentRecord = createAsyncThunk("/payments/record", async () => {
     const loadingId = toast.loading("Getting the payment records");
     try {
-        const response = await axiosInstance.get("/payments?count=100");
-        toast.success(response?.data?.message, {id: loadingId});
+        const response = await api.allPayments({ count: 100 });
+        toast.success(response?.data?.message, { id: loadingId });
         return response?.data;
     } catch (error) {
-        toast.error("Operation failed", {id: loadingId});
+        toast.error("Operation failed", { id: loadingId });
         throw error;
     }
 });
@@ -65,11 +65,11 @@ export const getPaymentRecord = createAsyncThunk("/payments/record", async () =>
 export const cancelCourseBundle = createAsyncThunk("/payments/cancel", async () => {
     const loadingId = toast.loading("unsubscribing the bundle...")
     try {
-        const response = await axiosInstance.post("/payments/unsubscribe");
-        toast.success(response?.data?.message, {id: loadingId});
+        const response = await api.cancelSubscription();
+        toast.success(response?.data?.message, { id: loadingId });
         return response?.data;
     } catch (error) {
-        toast.error(error?.response?.data?.message, {id: loadingId});
+        toast.error(error?.response?.data?.message, { id: loadingId });
         throw error;
     }
 })
