@@ -11,7 +11,7 @@ import sendEmail from "../utils/sendEmail.js";
 const cookieOptions = {
     httpOnly: true,
     maxAge: 7 * 24 * 60 * 60 * 1000, // 7 days
-    secure: true, 
+    secure: true,
     sameSite: 'none'
 }
 
@@ -204,7 +204,7 @@ const resetPassword = async (req, res, next) => {
     try {
         const { resetToken } = req.params;
 
-        const { password } = req.body; 
+        const { password } = req.body;
 
         const forgotPasswordToken = crypto
             .createHash('sha256')
@@ -462,7 +462,7 @@ const getMyCourses = async (req, res, next) => {
     try {
         const userId = req.user.id;
         let user = await userModel.findById(userId).populate('courseProgress.courseId');
-        
+
         if (!user) {
             return next(new AppError('User not found', 404));
         }
@@ -470,15 +470,15 @@ const getMyCourses = async (req, res, next) => {
         // Self-healing: Check if active subscription exists but not in courseProgress
         if (user.subscription && user.subscription.status === 'active' && user.subscription.courseId) {
             const subCourseId = user.subscription.courseId.toString();
-            const isEnrolled = user.courseProgress.some(cp => 
+            const isEnrolled = user.courseProgress.some(cp =>
                 cp.courseId && cp.courseId._id.toString() === subCourseId
             );
 
             if (!isEnrolled) {
                 await userModel.updateOne(
                     { _id: userId },
-                    { 
-                        $push: { 
+                    {
+                        $push: {
                             courseProgress: {
                                 courseId: user.subscription.courseId,
                                 lecturesCompleted: [],
@@ -497,15 +497,15 @@ const getMyCourses = async (req, res, next) => {
         const myCourses = user.courseProgress
             .filter(cp => cp.courseId)
             .map(cp => {
-                 return {
-                     ...cp.courseId.toObject(),
-                     progress: {
-                         lecturesCompleted: cp.lecturesCompleted,
-                         quizScores: cp.quizScores,
-                         isCompleted: cp.isCompleted,
-                         certificateUrl: cp.certificateUrl
-                     }
-                 }
+                return {
+                    ...cp.courseId.toObject(),
+                    progress: {
+                        lecturesCompleted: cp.lecturesCompleted,
+                        quizScores: cp.quizScores,
+                        isCompleted: cp.isCompleted,
+                        certificateUrl: cp.certificateUrl
+                    }
+                }
             });
 
         res.status(200).json({
@@ -513,6 +513,46 @@ const getMyCourses = async (req, res, next) => {
             message: 'My courses fetched successfully',
             courses: myCourses
         });
+    } catch (e) {
+        return next(new AppError(e.message, 500));
+    }
+}
+
+
+const updateQuizScore = async (req, res, next) => {
+    try {
+        const { courseId, lectureId, score } = req.body;
+        const { id } = req.user;
+
+        if (!courseId || !lectureId || score === undefined) {
+            return next(new AppError("Course ID, Lecture ID and Score are required", 400));
+        }
+
+        const user = await userModel.findById(id);
+
+        let courseProgress = user.courseProgress.find(
+            (progress) => progress.courseId.toString() === courseId
+        );
+
+        if (courseProgress) {
+            const existingQuizScore = courseProgress.quizScores.find(q => q.quizId === lectureId);
+            if (existingQuizScore) {
+                existingQuizScore.score = score;
+            } else {
+                courseProgress.quizScores.push({
+                    quizId: lectureId,
+                    score: score
+                });
+            }
+            await user.save();
+        }
+
+        res.status(200).json({
+            success: true,
+            message: "Quiz score updated successfully",
+            courseProgress
+        });
+
     } catch (e) {
         return next(new AppError(e.message, 500));
     }
@@ -530,5 +570,6 @@ export {
     updateUserProgress,
     getCourseProgress,
     generateCertificate,
-    getMyCourses
+    getMyCourses,
+    updateQuizScore
 }

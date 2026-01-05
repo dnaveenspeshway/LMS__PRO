@@ -244,7 +244,7 @@ const removeCourse = async (req, res, next) => {
 // add lecture to course by id
 const addLectureToCourseById = async (req, res, next) => {
     try {
-const { title, description, videoUrl, duration } = req.body;
+        const { title, description, videoUrl, duration } = req.body;
         const { id } = req.params;
 
         if (!title || !description || (!req.file && !videoUrl)) {
@@ -292,7 +292,7 @@ const { title, description, videoUrl, duration } = req.body;
 
                 fs.rmSync(`uploads/${req.file.filename}`);
             } catch (e) {
-                 return next(new AppError(e.message, 500));
+                return next(new AppError(e.message, 500));
             }
         } else if (videoUrl) {
             lectureData.lecture.secure_url = videoUrl;
@@ -309,7 +309,7 @@ const { title, description, videoUrl, duration } = req.body;
         })
 
     } catch (e) {
-         return next(new AppError(e.message, 500));
+        return next(new AppError(e.message, 500));
     }
 }
 
@@ -483,7 +483,7 @@ const getVideoDuration = async (req, res, next) => {
                 scopes: ['https://www.googleapis.com/auth/drive.readonly'],
             });
             const authClient = await auth.getClient();
-            google.options({auth: authClient});
+            google.options({ auth: authClient });
             const drive = google.drive({ version: 'v3' });
 
             try {
@@ -586,6 +586,46 @@ const getEnrolledStudents = async (req, res, next) => {
     }
 }
 
+const addQuizToLecture = async (req, res, next) => {
+    try {
+        const { courseId, lectureId } = req.params;
+        const { question, options, correctAnswer } = req.body;
+
+        if (!question || !options || !correctAnswer) {
+            return next(new AppError('All fields are required', 400));
+        }
+
+        const course = await courseModel.findById(courseId);
+
+        if (!course) {
+            return next(new AppError('Course not found', 404));
+        }
+
+        const lecture = course.lectures.id(lectureId);
+
+        if (!lecture) {
+            return next(new AppError('Lecture not found', 404));
+        }
+
+        lecture.quizzes.push({
+            question,
+            options,
+            correctAnswer
+        });
+
+        await course.save();
+
+        res.status(200).json({
+            success: true,
+            message: 'Quiz added to lecture successfully',
+            course
+        });
+
+    } catch (e) {
+        return next(new AppError(e.message, 500));
+    }
+}
+
 export {
     getAllCourses,
     getLecturesByCourseId,
@@ -597,5 +637,6 @@ export {
     updateCourseLecture,
     getVideoDuration,
     addQuizToCourse,
-    getEnrolledStudents
+    getEnrolledStudents,
+    addQuizToLecture
 }

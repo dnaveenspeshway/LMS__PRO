@@ -23,8 +23,8 @@ export default function DisplayLecture() {
   useEffect(() => {
     if (!state) navigate("/courses");
     if (role !== "ADMIN" && !data?.courseProgress?.some((cp) => cp.courseId === state?._id)) {
-        toast.error("You are not enrolled in this course");
-        navigate("/courses");
+      toast.error("You are not enrolled in this course");
+      navigate("/courses");
     }
   }, [role, data, state, navigate]);
 
@@ -97,12 +97,11 @@ export default function DisplayLecture() {
               <div className="w-full h-[170px] border bg-[#0000003d] shadow-lg">
                 {lectures && lectures?.[currentVideo]?.lecture?.secure_url && (
                   lectures[currentVideo].lecture.secure_url.includes("youtube.com") ||
-                  lectures[currentVideo].lecture.secure_url.includes("youtu.be") ? (
+                    lectures[currentVideo].lecture.secure_url.includes("youtu.be") ? (
                     <iframe
-                      src={`https://www.youtube.com/embed/${
-                        lectures[currentVideo].lecture.secure_url.split("v=")[1]?.split("&")[0] ||
+                      src={`https://www.youtube.com/embed/${lectures[currentVideo].lecture.secure_url.split("v=")[1]?.split("&")[0] ||
                         lectures[currentVideo].lecture.secure_url.split("youtu.be/")[1]?.split("&")[0]
-                      }`}
+                        }`}
                       frameBorder="0"
                       allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
                       allowFullScreen
@@ -144,38 +143,38 @@ export default function DisplayLecture() {
               <ul className="w-full md:p-2 p-0  flex flex-col gap-5 shadow-sm">
                 <li className="font-semibold bg-slate-50 dark:bg-slate-100 p-3 rounded-md shadow-lg sticky top-0 text-xl text-[#2320f7] font-nunito-sans flex flex-col gap-2">
                   <div className="flex items-center justify-between w-full">
-                      <p>Lectures list</p>
-                      {role === "ADMIN" && (
-                        <div className="flex gap-2">
-                            <button
-                              onClick={() =>
-                                navigate("/course/addlecture", { state: { ...state } })
-                              }
-                              className="btn-primary px-3 py-2 font-inter rounded-md font-semibold text-sm"
-                            >
-                              Add new lecture
-                            </button>
-                            <button
-                              onClick={() =>
-                                navigate("/course/addquiz", { state: { ...state } })
-                              }
-                              className="btn-primary px-3 py-2 font-inter rounded-md font-semibold text-sm bg-purple-500 hover:bg-purple-600"
-                            >
-                              Add Quiz
-                            </button>
-                        </div>
-                      )}
+                    <p>Lectures list</p>
+                    {role === "ADMIN" && (
+                      <div className="flex gap-2">
+                        <button
+                          onClick={() =>
+                            navigate("/course/addlecture", { state: { ...state } })
+                          }
+                          className="btn-primary px-3 py-2 font-inter rounded-md font-semibold text-sm"
+                        >
+                          Add new lecture
+                        </button>
+                        <button
+                          onClick={() =>
+                            navigate("/course/addquiz", { state: { ...state } })
+                          }
+                          className="btn-primary px-3 py-2 font-inter rounded-md font-semibold text-sm bg-purple-500 hover:bg-purple-600"
+                        >
+                          Add Quiz
+                        </button>
+                      </div>
+                    )}
                   </div>
                   {role === "USER" && (
-                      <div className="w-full">
-                        <div className="flex justify-between mb-1">
-                            <span className="text-sm font-medium text-blue-700 dark:text-blue-500">Progress</span>
-                            <span className="text-sm font-medium text-blue-700 dark:text-blue-500">{progressPercentage}%</span>
-                        </div>
-                        <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
-                            <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${progressPercentage}%` }}></div>
-                        </div>
+                    <div className="w-full">
+                      <div className="flex justify-between mb-1">
+                        <span className="text-sm font-medium text-blue-700 dark:text-blue-500">Progress</span>
+                        <span className="text-sm font-medium text-blue-700 dark:text-blue-500">{progressPercentage}%</span>
                       </div>
+                      <div className="w-full bg-gray-200 rounded-full h-2.5 dark:bg-gray-700">
+                        <div className="bg-blue-600 h-2.5 rounded-full" style={{ width: `${progressPercentage}%` }}></div>
+                      </div>
+                    </div>
                   )}
                 </li>
                 {lectures &&
@@ -183,17 +182,16 @@ export default function DisplayLecture() {
                     return (
                       <li className="space-y-2" key={lecture._id}>
                         <p
-                          className={`cursor-pointer text-base font-[500] font-open-sans ${
-                            currentVideo === idx
-                              ? "text-blue-600 dark:text-yellow-500"
-                              : " text-gray-600 dark:text-white"
-                          }`}
+                          className={`cursor-pointer text-base font-[500] font-open-sans ${currentVideo === idx
+                            ? "text-blue-600 dark:text-yellow-500"
+                            : " text-gray-600 dark:text-white"
+                            }`}
                           onClick={() => setCurrentVideo(idx)}
                         >
                           <span className="font-inter">{idx + 1}. </span>
                           {lecture?.title}
                           {userProgress?.lecturesCompleted?.includes(lecture?._id) && (
-                              <span className="ml-2 text-green-500 text-xs">✔ Watched</span>
+                            <span className="ml-2 text-green-500 text-xs">✔ Watched</span>
                           )}
                         </p>
                         {role === "ADMIN" && (
@@ -206,20 +204,47 @@ export default function DisplayLecture() {
                             Delete lecture
                           </button>
                         )}
+                        {role === "ADMIN" && (
+                          <button
+                            onClick={() =>
+                              navigate("/course/addquiz", { state: { ...state, lectureId: lecture._id } })
+                            }
+                            className="bg-green-500 px-2 py-1 rounded-md text-white font-inter font-[500] text-sm ml-2"
+                          >
+                            Add Quiz
+                          </button>
+                        )}
+                        {role === "USER" && userProgress?.lecturesCompleted?.includes(lecture?._id) && lecture?.quizzes?.length > 0 && (
+                          <div className="inline-flex items-center">
+                            <button
+                              onClick={() =>
+                                navigate("/course/quiz", { state: { ...state, lectureId: lecture._id, quizzes: lecture.quizzes } })
+                              }
+                              className="bg-blue-500 px-2 py-1 rounded-md text-white font-inter font-[500] text-sm ml-2"
+                            >
+                              Take Quiz
+                            </button>
+                            {userProgress?.quizScores?.find(qs => qs.quizId === lecture._id) && (
+                              <span className="ml-2 text-green-600 font-bold text-sm">
+                                Score: {userProgress.quizScores.find(qs => qs.quizId === lecture._id).score}/{lecture.quizzes.length}
+                              </span>
+                            )}
+                          </div>
+                        )}
                       </li>
                     );
                   })}
               </ul>
 
               {isCourseCompleted && (
-                  <div className="mt-5 w-full flex justify-center">
-                      <button 
-                          className="btn btn-success btn-lg text-white font-bold animate-pulse"
-                          onClick={handleCertificateDownload}
-                      >
-                          Download Certificate 🏆
-                      </button>
-                  </div>
+                <div className="mt-5 w-full flex justify-center">
+                  <button
+                    className="btn btn-success btn-lg text-white font-bold animate-pulse"
+                    onClick={handleCertificateDownload}
+                  >
+                    Download Certificate 🏆
+                  </button>
+                </div>
               )}
             </div>
           </div>

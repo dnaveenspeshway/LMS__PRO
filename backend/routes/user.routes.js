@@ -1,7 +1,7 @@
 import { Router } from "express";
 
 const router = Router();
-import { register, login, logout, getProfile, forgotPassword, resetPassword, changePassword, updateUser, updateUserProgress, getCourseProgress, generateCertificate, getMyCourses } from '../controllers/user.controller.js';
+import { register, login, logout, getProfile, forgotPassword, resetPassword, changePassword, updateUser, updateUserProgress, getCourseProgress, generateCertificate, getMyCourses, updateQuizScore } from '../controllers/user.controller.js';
 import { isLoggedIn } from "../middleware/auth.middleware.js";
 import upload from '../middleware/multer.middleware.js'
 
@@ -18,6 +18,8 @@ router.post('/update/:id', isLoggedIn, upload.single("avatar"), updateUser);
 router.route('/progress')
     .post(isLoggedIn, updateUserProgress)
     .get(isLoggedIn, getCourseProgress);
+
+router.post('/progress/quiz', isLoggedIn, updateQuizScore);
 
 router.get('/certificate/:courseId', isLoggedIn, generateCertificate);
 

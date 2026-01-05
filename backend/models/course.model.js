@@ -50,9 +50,29 @@ const courseSchema = new Schema({
             duration: {
                 type: String,
                 required: false
-            }
+            },
+            // Per-lecture quizzes
+            quizzes: [
+                {
+                    question: {
+                        type: String,
+                        required: true
+                    },
+                    options: [
+                        {
+                            type: String,
+                            required: true
+                        }
+                    ],
+                    correctAnswer: {
+                        type: String,
+                        required: true
+                    }
+                }
+            ]
         }
     ],
+    // Global quizzes (legacy or course-level)
     quizzes: [
         {
             question: {

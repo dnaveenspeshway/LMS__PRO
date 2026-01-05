@@ -46,6 +46,19 @@ export const deleteCourseLecture = createAsyncThunk("/courses/lecture/delete", a
     }
 })
 
+// ....add quiz to specific lecture...
+export const addLectureQuiz = createAsyncThunk("/courses/lecture/quiz/add", async (data) => {
+    const loadingId = toast.loading("Adding Quiz to Lecture...");
+    try {
+        const res = await axiosInstance.post(`/courses/${data.courseId}/lectures/${data.lectureId}/quiz`, data.quizData);
+        toast.success("Quiz Added Successfully", { id: loadingId })
+        return res?.data;
+    } catch (error) {
+        toast.error(error?.response?.data?.message, { id: loadingId })
+        throw error
+    }
+})
+
 const lectureSlice = createSlice({
     name: 'lecture',
     initialState,

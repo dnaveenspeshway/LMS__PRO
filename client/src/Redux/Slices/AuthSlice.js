@@ -64,7 +64,7 @@ export const forgetPassword = createAsyncThunk(
     "auth/user/forgetPassword",
     async (email) => {
         const loadingMessage = toast.loading("Please Wait! sending email...");
-        const res = await axiosInstance.post("/user/reset", {email});
+        const res = await axiosInstance.post("/user/reset", { email });
         toast.success(res?.data?.message, { id: loadingMessage });
         return res?.data
     }
@@ -88,6 +88,11 @@ export const getUserProgress = createAsyncThunk("/auth/user/progress", async (co
 
 export const updateProgress = createAsyncThunk("/auth/user/updateProgress", async (data) => {
     const res = await axiosInstance.post(`/user/progress`, data);
+    return res?.data;
+});
+
+export const updateUserQuizScore = createAsyncThunk("/auth/user/updateQuizScore", async (data) => {
+    const res = await axiosInstance.post(`/user/progress/quiz`, data);
     return res?.data;
 });
 
