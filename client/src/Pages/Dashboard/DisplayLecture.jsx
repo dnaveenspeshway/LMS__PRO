@@ -82,25 +82,25 @@ export default function DisplayLecture() {
   }, [state, dispatch, navigate]); // Add dependencies
   return (
     <Layout hideFooter={true} hideNav={true} hideBar={true}>
-      <section className="flex flex-col gap-6 items-center md:py-8 py-0 px-0 h-screen overflow-y-scroll">
-        <div className="flex flex-col dark:bg-base-100 relative md:gap-12 gap-5 rounded-lg md:py-10 md:pt-3 py-0 pt-3 md:px-7 px-0 md:w-[780px] w-full h-full overflow-y-hidden shadow-custom dark:shadow-xl">
+      <section className="flex flex-col gap-6 items-center md:py-8 py-0 px-0 h-screen overflow-y-hidden">
+        <div className="flex flex-col dark:bg-base-100 relative md:gap-8 gap-5 rounded-lg md:py-10 md:pt-3 py-0 pt-3 md:px-7 px-0 md:w-[1100px] w-full h-full overflow-y-hidden shadow-custom dark:shadow-xl">
           <h1 className="text-center relative md:px-0 px-3 w-fit dark:text-purple-500 md:text-2xl text-lg font-bold font-inter after:content-[' ']  after:absolute after:-bottom-2  md:after:left-0 after:left-3 after:h-[3px] after:w-[60%] after:rounded-full after:bg-yellow-400 dark:after:bg-yellow-600">
             Course:{" "}
             <span className="text-violet-500 dark:text-yellow-500 font-nunito-sans">
               {state?.title}
             </span>
           </h1>
-          <div className="flex md:flex-row flex-col md:justify-between w-full h-full">
+          <div className="flex md:flex-row flex-col md:justify-between w-full flex-1 overflow-hidden">
             {/* left section for lecture video and details */}
-            <div className="md:w-[48%] w-full md:p-3 p-1 overflow-y-scroll md:h-full h-[40%] flex justify-center">
-              <div className="w-full h-fit border bg-[#0000003d] shadow-lg overflow-hidden">
-                {lectures && lectures?.[currentVideo]?.lecture?.secure_url && (() => {
-                  const url = lectures[currentVideo].lecture.secure_url;
+            <div className="md:w-[60%] w-full md:p-3 p-1 overflow-y-scroll md:h-full h-[45%] flex flex-col gap-5">
+              <div className="w-full border bg-black shadow-lg overflow-hidden flex-shrink-0">
+                {lectures && (lectures?.[currentVideo]?.lecture?.secure_url || lectures?.[currentVideo]?.lecture) && (() => {
+                  const url = lectures[currentVideo]?.lecture?.secure_url || lectures[currentVideo]?.lecture;
                   const youtubeRegex = /(?:https?:\/\/)?(?:www\.)?(?:m\.)?(?:youtube\.com|youtu\.be)\/(?:watch\?v=|embed\/|v\/|)([^\&\?\n]{11})/;
                   const driveRegex = /(?:https?:\/\/)?drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)(?:\/view)?(?:\?usp=sharing)?/;
 
-                  const youtubeMatch = url.match(youtubeRegex);
-                  const driveMatch = url.match(driveRegex);
+                  const youtubeMatch = typeof url === 'string' ? url.match(youtubeRegex) : null;
+                  const driveMatch = typeof url === 'string' ? url.match(driveRegex) : null;
 
                   if (youtubeMatch) {
                     return (
@@ -140,24 +140,24 @@ export default function DisplayLecture() {
                     );
                   }
                 })()}
-                <div className="p-4">
-                  <h1 className="text-[17px] text-gray-700 font-[500] dark:text-white font-lato">
-                    <span className="text-blue-500 dark:text-yellow-500 font-inter font-semibold text-lg">
-                      Title:{" "}
-                    </span>
+              </div>
+              <div className="p-1 space-y-6">
+                <div>
+                  <h2 className="text-blue-500 dark:text-yellow-500 font-inter font-bold text-xl mb-2">Title</h2>
+                  <h1 className="text-2xl text-gray-800 dark:text-white font-[600] font-inter">
                     {lectures && lectures?.[currentVideo]?.title}
                   </h1>
-                  <p className="text-[16.5px] pb-4 text-gray-700 font-[500] dark:text-slate-300 font-lato">
-                    <span className="text-blue-500 dark:text-yellow-500 font-inter font-semibold text-lg">
-                      Description:{" "}
-                    </span>
+                </div>
+                <div className="border-t pt-5 pb-10 dark:border-gray-700">
+                  <h2 className="text-blue-500 dark:text-yellow-500 font-inter font-bold text-xl mb-2">Description</h2>
+                  <p className="text-lg text-gray-700 dark:text-slate-300 font-lato whitespace-pre-wrap break-words leading-relaxed">
                     {lectures && lectures?.[currentVideo]?.description}
                   </p>
                 </div>
               </div>
             </div>
             {/* right section for lectures list */}
-            <div className="md:w-[48%] pb-12 md:flex-row flex-col w-full md:h-full h-[60%] overflow-y-scroll">
+            <div className="md:w-[38%] pb-12 flex flex-col w-full md:h-full h-[55%] overflow-y-scroll">
               <ul className="w-full md:p-2 p-0  flex flex-col gap-5 shadow-sm">
                 <li className="font-semibold bg-slate-50 dark:bg-slate-100 p-3 rounded-md shadow-lg sticky top-0 text-xl text-[#2320f7] font-nunito-sans flex flex-col gap-2">
                   <div className="flex items-center justify-between w-full">
