@@ -482,7 +482,7 @@ const getVideoDuration = async (req, res, next) => {
                 keyFile: process.env.GOOGLE_APPLICATION_CREDENTIALS, // Path to your service account key file
                 scopes: ['https://www.googleapis.com/auth/drive.readonly'],
             });
-            
+
             const authClient = await auth.getClient();
             google.options({ auth: authClient });
             const drive = google.drive({ version: 'v3' });
@@ -627,6 +627,129 @@ const addQuizToLecture = async (req, res, next) => {
     }
 }
 
+const deleteQuizFromCourse = async (req, res, next) => {
+    try {
+        const { courseId, quizId } = req.params;
+
+        const course = await courseModel.findById(courseId);
+
+        if (!course) {
+            return next(new AppError('Course not found', 404));
+        }
+
+        // Check if it's a global quiz/assignment
+        const quizIndex = course.quizzes.findIndex(q => q._id.toString() === quizId);
+
+        if (quizIndex !== -1) {
+            course.quizzes.splice(quizIndex, 1);
+            await course.save();
+            return res.status(200).json({
+                success: true,
+                message: 'Assignment question deleted successfully',
+                course
+            });
+        }
+
+        return next(new AppError('Assignment question not found', 404));
+
+    } catch (e) {
+        return next(new AppError(e.message, 500));
+    }
+}
+
+const updateQuizInCourse = async (req, res, next) => {
+    try {
+        const { courseId, quizId } = req.params;
+        const { question, options, correctAnswer } = req.body;
+
+        const course = await courseModel.findById(courseId);
+
+        if (!course) {
+            return next(new AppError('Course not found', 404));
+        }
+
+        const quiz = course.quizzes.id(quizId);
+
+        if (quiz) {
+            if (question) quiz.question = question;
+            if (options) quiz.options = options;
+            if (correctAnswer) quiz.correctAnswer = correctAnswer;
+
+            await course.save();
+            return res.status(200).json({
+                success: true,
+                message: 'Assignment question updated successfully',
+                course
+            });
+        }
+
+        return next(new AppError('Assignment question not found', 404));
+
+    } catch (e) {
+        return next(new AppError(e.message, 500));
+    }
+}
+
+const deleteQuizFromLecture = async (req, res, next) => {
+    try {
+        const { courseId, lectureId, quizId } = req.params;
+
+        const course = await courseModel.findById(courseId);
+        if (!course) return next(new AppError('Course not found', 404));
+
+        const lecture = course.lectures.id(lectureId);
+        if (!lecture) return next(new AppError('Lecture not found', 404));
+
+        const quizIndex = lecture.quizzes.findIndex(q => q._id.toString() === quizId);
+
+        if (quizIndex !== -1) {
+            lecture.quizzes.splice(quizIndex, 1);
+            await course.save();
+            return res.status(200).json({
+                success: true,
+                message: 'Quiz deleted successfully',
+                course
+            });
+        }
+
+        return next(new AppError('Quiz not found', 404));
+    } catch (e) {
+        return next(new AppError(e.message, 500));
+    }
+}
+
+const updateQuizInLecture = async (req, res, next) => {
+    try {
+        const { courseId, lectureId, quizId } = req.params;
+        const { question, options, correctAnswer } = req.body;
+
+        const course = await courseModel.findById(courseId);
+        if (!course) return next(new AppError('Course not found', 404));
+
+        const lecture = course.lectures.id(lectureId);
+        if (!lecture) return next(new AppError('Lecture not found', 404));
+
+        const quiz = lecture.quizzes.id(quizId);
+
+        if (quiz) {
+            if (question) quiz.question = question;
+            if (options) quiz.options = options;
+            if (correctAnswer) quiz.correctAnswer = correctAnswer;
+
+            await course.save();
+            return res.status(200).json({
+                success: true,
+                message: 'Quiz updated successfully',
+                course
+            });
+        }
+
+        return next(new AppError('Quiz not found', 404));
+    } catch (e) {
+        return next(new AppError(e.message, 500));
+    }
+}
+
 export {
     getAllCourses,
     getLecturesByCourseId,
@@ -639,5 +762,9 @@ export {
     getVideoDuration,
     addQuizToCourse,
     getEnrolledStudents,
-    addQuizToLecture
+    addQuizToLecture,
+    deleteQuizFromCourse,
+    updateQuizInCourse,
+    deleteQuizFromLecture,
+    updateQuizInLecture
 }
