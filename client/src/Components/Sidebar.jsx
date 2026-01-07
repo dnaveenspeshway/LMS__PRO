@@ -62,15 +62,17 @@ export default function Sidebar({ hideBar = false }) {
               </li>
             )}
 
-            <li>
-              <Link to="/courses" className="flex gap-4 items-center">
-                <FaList
-                  size={18}
-                  className="text-gray-500 dark:text-slate-100"
-                />
-                All Courses
-              </Link>
-            </li>
+            {isLoggedIn && (
+              <li>
+                <Link to="/courses" className="flex gap-4 items-center">
+                  <FaList
+                    size={18}
+                    className="text-gray-500 dark:text-slate-100"
+                  />
+                  All Courses
+                </Link>
+              </li>
+            )}
 
             {isLoggedIn && role === "USER" && (
               <li>

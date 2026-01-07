@@ -20,9 +20,9 @@ export default function CourseList() {
   return (
     <Layout>
       <section className="flex flex-col gap-14 md:py-6 py-5 md:px-20 px-3 min-h-screen">
-        <h1 className="md:text-4xl text-2xl w-fit text-blue-600 dark:text-white font-inter font-[500] after:content-[' '] relative after:absolute after:-bottom-3.5 after:left-0 after:h-1.5 after:w-[60%] after:rounded-full after:bg-yellow-400 dark:after:bg-yellow-600">
+        <h1 className="md:text-5xl text-3xl w-fit text-gray-800 dark:text-white font-inter font-bold after:content-[' '] relative after:absolute after:-bottom-3.5 after:left-0 after:h-1.5 after:w-[60%] after:rounded-full after:bg-yellow-400 dark:after:bg-yellow-600">
           Explore the courses made by{" "}
-          <span className="font-[600] font-lato text-yellow-500">
+          <span className="font-lato text-yellow-500">
             Industry experts
           </span>
         </h1>

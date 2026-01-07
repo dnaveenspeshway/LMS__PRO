@@ -24,9 +24,11 @@ export default function Navbar() {
     <nav className="sticky top-0 z-50 md:h-[72px] h-[65px] md:px-[35px] px-[15px] bg-[#ffffffd0] dark:bg-[#21242bc5] shadow-custom backdrop-blur-md flex justify-between items-center">
       {/* Left section: Sidebar toggle and Logo */}
       <div className="flex items-center gap-2">
-        <button onClick={toggleSidebar} className="p-2 rounded-full text-lg font-semibold">
-          <FiMenu size={"32px"} className="text-gray-900 dark:text-white" />
-        </button>
+        {isLoggedIn && (
+          <button onClick={toggleSidebar} className="p-2 rounded-full text-lg font-semibold">
+            <FiMenu size={"32px"} className="text-gray-900 dark:text-white" />
+          </button>
+        )}
         <div className="text-2xl font-bold text-purple-600">LMS</div>
       </div>
 

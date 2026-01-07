@@ -7,8 +7,8 @@ export default function CourseCard({ data }) {
  
 
   return (
-    <div 
-      className="md:w-[22rem] w-[95%] md:h-[445px] h-[500px] shadow-custom dark:shadow-lg rounded-lg cursor-pointer group overflow-hidden bg-white dark:bg-zinc-700 transition-transform transform hover:scale-[1.01]"
+    <div
+      className="md:w-[22rem] w-[95%] shadow-custom dark:shadow-lg rounded-lg cursor-pointer group overflow-hidden bg-white dark:bg-zinc-700 transition-transform transform hover:scale-[1.01]"
     onClick={() => navigate("/courses/description/", {state: {...data}})}
     >
       <div className="relative overflow-hidden">
@@ -21,7 +21,7 @@ export default function CourseCard({ data }) {
           <FaPlay className="text-yellow-500 dark:text-yellow-400 text-xl" />
         </div>
       </div>
-      <div className="p-4 md:space-y-2 space-y-3 text-gray-800 dark:text-white">
+      <div className="p-4 space-y-3 text-gray-800 dark:text-white">
         <h2 className="text-2xl font-semibold line-clamp-2">{data?.title}</h2>
         <p className="line-clamp-2 font-nunito-sans text-base font-[500]">
           {data?.description}
