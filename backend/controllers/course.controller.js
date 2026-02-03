@@ -121,14 +121,13 @@ const getLecturesByCourseId = async (req, res, next) => {
 const createCourse = async (req, res, next) => {
     try {
         console.log("createCourse req.body:", req.body);
-        const { title, description, category, createdBy, price } = req.body;
+        const { title, description, category, price } = req.body;
 
-        if (!title || !description || !category || !createdBy || !price) {
+        if (!title || !description || !category || !price) {
             const missing = [];
             if (!title) missing.push('title');
             if (!description) missing.push('description');
             if (!category) missing.push('category');
-            if (!createdBy) missing.push('createdBy');
             if (!price) missing.push('price');
             return next(new AppError(`All fields are required. Missing: ${missing.join(', ')}`, 400));
         }
@@ -137,7 +136,6 @@ const createCourse = async (req, res, next) => {
             title,
             description,
             category,
-            createdBy,
             price
         })
 

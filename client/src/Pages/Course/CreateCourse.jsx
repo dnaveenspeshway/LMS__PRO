@@ -16,7 +16,6 @@ export default function CreateCourse() {
   const [userInput, setUserInput] = useState({
     title: "",
     category: "",
-    createdBy: "",
     description: "",
     thumbnail: null,
     previewImage: "",
@@ -54,7 +53,6 @@ export default function CreateCourse() {
       !userInput.title ||
       !userInput.description ||
       !userInput.category ||
-      !userInput.createdBy ||
       !userInput.thumbnail ||
       !userInput.price
     ) {
@@ -67,7 +65,6 @@ export default function CreateCourse() {
     formData.append("title", userInput.title);
     formData.append("description", userInput.description);
     formData.append("category", userInput.category);
-    formData.append("createdBy", userInput.createdBy);
     formData.append("price", userInput.price);
     formData.append("thumbnail", userInput.thumbnail);
 
@@ -76,7 +73,6 @@ export default function CreateCourse() {
       setUserInput({
         title: "",
         category: "",
-        createdBy: "",
         description: "",
         thumbnail: null,
         previewImage: "",
@@ -126,15 +122,7 @@ export default function CreateCourse() {
                   onChange={handleImageUpload}
                 />
               </div>
-              {/* title */}
-              <InputBox
-                label={"Title"}
-                name={"title"}
-                type={"text"}
-                placeholder={"Enter Course Title"}
-                onChange={handleUserInput}
-                value={userInput.title}
-              />
+              {/* price */}
               <InputBox
                 label={"Price"}
                 name={"price"}
@@ -145,14 +133,14 @@ export default function CreateCourse() {
               />
             </div>
             <div className="md:w-[48%] w-full flex flex-col gap-5">
-              {/* instructor */}
+              {/* title */}
               <InputBox
-                label={"Instructor"}
-                name={"createdBy"}
+                label={"Title"}
+                name={"title"}
                 type={"text"}
-                placeholder={"Enter Course instructor"}
+                placeholder={"Enter Course Title"}
                 onChange={handleUserInput}
-                value={userInput.createdBy}
+                value={userInput.title}
               />
               {/* category */}
               <InputBox
