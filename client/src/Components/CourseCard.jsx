@@ -42,12 +42,6 @@ export default function CourseCard({ data }) {
             Price: {data?.price}
           </p>
         </div>
-        <div className="flex items-center space-x-2">
-          <FaUser className="text-yellow-500 dark:text-yellow-400" />
-          <p className="text-base font-semibold">
-            Instructor: {data?.createdBy}
-          </p>
-        </div>
       </div>
     </div>
   );

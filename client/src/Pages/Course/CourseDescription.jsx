@@ -39,13 +39,6 @@ export default function CourseDescription() {
                   </span>
                   {state?.numberOfLectures}
                 </p>
-
-                <p className="font-semibold">
-                  <span className="text-yellow-600 dark:text-yellow-500 font-bold">
-                    Instructor:{" "}
-                  </span>
-                  {state?.createdBy}
-                </p>
               </div>
             </div>
           </div>

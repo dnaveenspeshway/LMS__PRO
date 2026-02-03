@@ -226,7 +226,6 @@ export default function AdminDashboard() {
                     <th>S No</th>
                     <th>Course Title</th>
                     <th>Course Category</th>
-                    <th>Instructor</th>
                     <th>Total Lectures</th>
                     <th>Price</th>
                     <th>Description</th>
@@ -246,7 +245,6 @@ export default function AdminDashboard() {
                           ></textarea>
                         </td>
                         <td>{course?.category}</td>
-                        <td>{course?.createdBy}</td>
                         <td>{course?.numberOfLectures}</td>
                         <td>{course?.price}</td>
                         <td className="max-w-28  whitespace-nowrap">
